@@ -1,26 +1,164 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* --- Colors --- */
+  --color-paper: #F6F0E4;
+  --color-offwhite: #FAF7F0;
+  --color-charcoal: #2C3428;
+  --color-ink: #1C2820;
+
+  /* Brand greens — the rain tree */
+  --color-forest: #182820;
+  --color-canopy: #243C2E;
+  --color-moss: #3D6147;
+  --color-sage: #6B8C72;
+  --color-sage-light: #9BB8A0;
+
+  /* Warmth — the bungalow */
+  --color-wood: #8A6647;
+  --color-terracotta: #B85C38;
+  --color-warmwood: #7A5438;
+
+  /* Text — secondary darkened from #5A6A52 to pass WCAG AA on all warm backgrounds */
+  --color-text-primary: #2C3428;
+  --color-text-secondary: #3E5040;
+  --color-text-muted: #6A7862;
+  --color-divider: #C8C0AA;
+
+  /* Section backgrounds — a sequence of light across a long afternoon */
+  --color-bg-arrival: #182820;   /* deep forest green — the canopy at dusk */
+  --color-bg-story: #EAE2C8;     /* morning paper — warm parchment */
+  --color-bg-space: #C4D8BC;     /* outdoors — green, rain tree dapple */
+  --color-bg-food: #F8F5EC;      /* bakery counter — near-white, fresh */
+  --color-bg-books: #E2D8B8;     /* worn shelves — amber ivory */
+  --color-bg-reviews: #DCCFB0;   /* golden afternoon — the deepest warm */
+  --color-bg-secret: #F4F1EA;    /* lightest moment — airy */
+  --color-bg-events: #DEDAD0;    /* dusk, slightly cooler */
+  --color-bg-visit: #CCC6B0;     /* end of day — closing warmth */
+
+  /* Signal colours */
+  --color-mysore-pak: #C06B30;   /* Appetite. The croissant, not brass. */
+  --color-moss-signal: #3D6147;  /* Nature. The rain tree canopy. */
+
+  /* Typography */
+  --font-display: var(--font-cormorant);
+  --font-body: var(--font-dm-sans);
+  --font-stamp: var(--font-mono, 'Courier New', monospace);
+
+  /* Spacing */
+  --spacing-section: 7rem;
+  --spacing-section-sm: 4rem;
+
+  /* Easing */
+  --ease-natural: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- Base reset --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100dvh;
+}
+
+/* --- Typography defaults --- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+/* --- Skip link --- */
+.sr-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.sr-skip-link:focus {
+  left: 1rem;
+}
+
+/* --- 404 back link --- */
+.not-found-back-link {
+  color: rgba(246, 240, 228, 0.72);
+  transition: color 250ms ease;
+}
+.not-found-back-link:hover {
+  color: #F6F0E4;
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* --- Image defaults --- */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Focus visible --- */
+:focus-visible {
+  outline: 2px solid var(--color-moss);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* --- Dark mode --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #182820;
+    --color-offwhite: #1E3228;
+    --color-ink: #F6F0E4;
+    --color-text-primary: #E4DEC8;
+    --color-text-secondary: #A0A882;
+    --color-text-muted: #6A7A60;
+    --color-divider: #2E4038;
+
+    --color-bg-story: #1A2B16;
+    --color-bg-space: #141C14;
+    --color-bg-food: #221E17;
+    --color-bg-books: #1A1816;
+    --color-bg-reviews: #201C14;
+    --color-bg-secret: #1C1E1A;
+    --color-bg-events: #181C1C;
+    --color-bg-visit: #161410;
+  }
 }
