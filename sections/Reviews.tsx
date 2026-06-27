@@ -73,7 +73,7 @@ export function Reviews() {
 
       {/* Eyebrow */}
       <motion.p
-        animate={isInView ? { opacity: 0.6 } : { opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.8, ease: EASE }}
         style={{
           fontFamily: "var(--font-stamp)",
@@ -155,7 +155,7 @@ export function Reviews() {
 
               {/* Attribution */}
               <motion.p
-                animate={isInView ? { opacity: 0.48 } : { opacity: 0 }}
+                animate={isInView ? { opacity: 0.65 } : { opacity: 0 }}
                 transition={{ duration: 0.45, delay: delay + 0.24, ease: EASE }}
                 style={{
                   fontFamily: "var(--font-stamp)",

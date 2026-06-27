@@ -135,8 +135,8 @@ export function Visit() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          gap: "clamp(2.5rem, 7vw, 5rem)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
+          gap: "clamp(2rem, 6vw, 4rem)",
           alignItems: "start",
         }}>
           {/* Where */}

@@ -108,7 +108,7 @@ export function Navbar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  layout: { type: "spring", stiffness: 260, damping: 28 },
+                  layout: { type: "spring", stiffness: 260, damping: 32 },
                   opacity: { duration: 0.25, ease: EASE },
                 }}
                 style={{ zIndex: 51 }}

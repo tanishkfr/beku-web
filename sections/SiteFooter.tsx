@@ -123,7 +123,7 @@ export function SiteFooter() {
           paddingRight: IMG_PAD,
           paddingTop: "clamp(2.5rem, 6vh, 4rem)",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
           gap: "clamp(4px, 0.6vw, 8px)",
         }}
       >

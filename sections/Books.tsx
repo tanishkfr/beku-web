@@ -83,12 +83,8 @@ function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
           >
             <motion.div
               animate={{
-                y: activeSpine === i && !prefersReduced
-                  ? spine.featured ? -12 : -16
-                  : 0,
-                rotate: activeSpine === i && !prefersReduced
-                  ? spine.lean * 0.4
-                  : spine.lean,
+                y: activeSpine === i && !prefersReduced ? -5 : 0,
+                rotate: spine.lean,
               }}
               transition={{ type: "spring", stiffness: 420, damping: 28 }}
               onMouseEnter={() => setActiveSpine(i)}
