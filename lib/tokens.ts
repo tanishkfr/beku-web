@@ -1,7 +1,7 @@
 // Design tokens — single source of truth for all design values.
 // Import these wherever you'd otherwise hardcode a constant.
 
-export const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1]
+export const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 // Horizontal padding — consistent across all sections
 export const H_PAD = "clamp(2rem, 8vw, 7rem)"

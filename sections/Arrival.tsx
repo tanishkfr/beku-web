@@ -17,7 +17,7 @@ function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={prefersReduced ? { duration: 0 } : {
-        layout: { type: "spring", stiffness: 260, damping: 28 },
+        layout: { type: "spring", stiffness: 260, damping: 32 },
         // No delay on opacity — the FLIP carries visual continuity
         opacity: { duration: 0.35, ease: EASE },
       }}
@@ -124,7 +124,7 @@ export function Arrival() {
             margin: 0,
           }}
         >
-          Café · Bakery · Bookstore · JP Nagar
+          Café, Bakery, Bookstore · JP Nagar
         </motion.p>
 
         {/* Google rating */}
@@ -172,7 +172,9 @@ export function Arrival() {
           </AnimatePresence>
 
           <motion.p
-            {...fade(1.0)}
+            initial={{ opacity: prefersReduced ? 1 : 0, filter: prefersReduced ? "blur(0px)" : "blur(6px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.9, delay: prefersReduced ? 0 : 1.0, ease: EASE }}
             style={{
               fontFamily: "var(--font-cormorant)",
               fontSize: "clamp(1.125rem, 2.2vw, 1.875rem)",
@@ -291,7 +293,7 @@ export function Arrival() {
           position: "relative",
           width: "100%",
           height: "clamp(55vh, 74vh, 84vh)",
-          borderRadius: "4px",
+          borderRadius: "6px",
           overflow: "hidden",
         }}>
           <Image
@@ -331,7 +333,7 @@ export function Arrival() {
           paddingRight: "clamp(1rem, 3.5vw, 2.5rem)",
         }}
       >
-        Café · Bakery · Bookstore, JP Nagar
+        JP Nagar, Bangalore
       </motion.p>
 
     </section>

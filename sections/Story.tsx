@@ -46,27 +46,6 @@ export function Story() {
         ].join(", "),
       }}
     >
-      {!prefersReduced && (
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.6 }}
-          viewport={{ once: true, margin: "0%" }}
-          transition={{ duration: 0.9, ease: EASE }}
-          style={{
-            fontFamily: "var(--font-stamp)",
-            fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-            fontWeight: 400,
-            color: "var(--color-warmwood)",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            margin: "0 0 clamp(1.5rem, 3.5vh, 2.25rem) 0",
-            paddingLeft: H_PAD,
-          }}
-        >
-          Overheard at Beku
-        </motion.h2>
-      )}
-
       <p
         style={{
           fontFamily: "var(--font-cormorant)",
@@ -91,7 +70,7 @@ export function Story() {
               opacity: prefersReduced ? 1 : 0.12,
               transform: prefersReduced ? "none" : "translateY(6px)",
               fontStyle: prefersReduced ? "normal" : "italic",
-              transition: "opacity 350ms ease, transform 350ms ease",
+              transition: "opacity 350ms cubic-bezier(0.22, 1, 0.36, 1), transform 350ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           >
             {word}

@@ -1,7 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { motion, useReducedMotion } from "framer-motion"
+import { useState } from "react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 
 const EVENTS_SRC = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2070&q=82"
@@ -10,22 +11,24 @@ const EVENTS = [
   {
     cadence: "Every Thursday",
     name: "Film Screening",
-    detail: "Bring something to drink. Doors open 7:30pm.",
+    quirk: "We've shown Tarkovsky twice. Both times the filter coffee ran out before the film ended.",
   },
   {
     cadence: "First Saturday",
     name: "Book Swap",
-    detail: "Bring one, take one. Upstairs, from 11am.",
+    quirk: "Someone once left a Tolstoy and took a cookbook. We respect that.",
   },
   {
     cadence: "Last Sunday",
     name: "Coffee Cupping",
-    detail: "Six origins. Guided by the team. 10am.",
+    quirk: "Last month someone identified the Ethiopian process by smell alone. We gave them the bag.",
   },
 ]
 
 export function Events() {
   const prefersReduced = useReducedMotion()
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const itemReveal = (delay: number) => ({
     initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
@@ -102,58 +105,114 @@ export function Events() {
       </motion.div>
 
       <div role="list" style={{ display: "flex", flexDirection: "column", paddingLeft: H_PAD, paddingRight: H_PAD }}>
-        {EVENTS.map((event, i) => (
-          <motion.div
-            key={event.name}
-            role="listitem"
-            {...itemReveal(0.1 + i * 0.1)}
-            style={{
-              paddingTop: "clamp(1.25rem, 3vh, 1.75rem)",
-              paddingBottom: "clamp(1.25rem, 3vh, 1.75rem)",
-              borderTop: `1px solid rgba(175, 150, 115, ${i === 0 ? "0.35" : "0.22"})`,
-              display: "grid",
-              gridTemplateColumns: "clamp(8rem, 20vw, 15rem) 1fr",
-              gap: "clamp(1.5rem, 4vw, 3rem)",
-              alignItems: "baseline",
-            }}
-          >
-            <p style={{
-              fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-              fontWeight: 400,
-              color: "var(--color-warmwood)",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              margin: 0,
-              opacity: 0.65,
-            }}>
-              {event.cadence}
-            </p>
-            <div>
-              <p style={{
-                fontFamily: "var(--font-cormorant)",
-                fontSize: "clamp(1.375rem, 2.4vw, 2rem)",
-                fontWeight: 400,
-                fontStyle: "italic",
-                color: "var(--color-ink)",
-                lineHeight: 1.2,
-                margin: "0 0 0.3em 0",
-              }}>
-                {event.name}
-              </p>
-              <p style={{
-                fontFamily: "var(--font-dm-sans)",
-                fontSize: "clamp(0.8125rem, 0.95vw, 0.9375rem)",
-                fontWeight: 300,
-                color: "var(--color-text-muted)",
-                lineHeight: 1.55,
-                margin: 0,
-              }}>
-                {event.detail}
-              </p>
-            </div>
-          </motion.div>
-        ))}
+        {EVENTS.map((event, i) => {
+          const isOpen = openIndex === i
+          const isHovered = hoveredIndex === i
+
+          return (
+            <motion.div
+              key={event.name}
+              role="listitem"
+              {...itemReveal(0.1 + i * 0.1)}
+            >
+              <button
+                onClick={() => setOpenIndex(isOpen ? null : i)}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                aria-expanded={isOpen}
+                style={{
+                  width: "100%",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  paddingTop: "clamp(1.25rem, 3vh, 1.75rem)",
+                  paddingBottom: "clamp(1.25rem, 3vh, 1.75rem)",
+                  borderTop: `1px solid rgba(175, 150, 115, ${i === 0 ? "0.35" : "0.22"})`,
+                  display: "grid",
+                  gridTemplateColumns: "clamp(9rem, 22vw, 16rem) 1fr auto",
+                  gap: "clamp(1.5rem, 4vw, 3rem)",
+                  alignItems: "center",
+                  textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                  transition: "opacity 180ms ease",
+                  opacity: hoveredIndex !== null && !isHovered ? 0.55 : 1,
+                }}
+              >
+                <p style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.6875rem, 1vw, 0.8125rem)",
+                  fontWeight: 400,
+                  color: "var(--color-warmwood)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  margin: 0,
+                  opacity: 0.8,
+                }}>
+                  {event.cadence}
+                </p>
+
+                <p style={{
+                  fontFamily: "var(--font-cormorant)",
+                  fontSize: "clamp(1.375rem, 2.4vw, 2rem)",
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  color: "var(--color-ink)",
+                  lineHeight: 1.2,
+                  margin: 0,
+                  transition: "letter-spacing 220ms ease",
+                  letterSpacing: isHovered && !prefersReduced ? "0.01em" : "0",
+                }}>
+                  {event.name}
+                </p>
+
+                {/* Arrow indicator */}
+                <motion.span
+                  aria-hidden="true"
+                  animate={{ rotate: isOpen ? 90 : 0, opacity: isHovered || isOpen ? 0.7 : 0.25 }}
+                  transition={{ duration: 0.22, ease: EASE }}
+                  style={{
+                    fontFamily: "var(--font-dm-sans)",
+                    fontSize: "clamp(0.875rem, 1.1vw, 1rem)",
+                    color: "var(--color-warmwood)",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
+                >
+                  →
+                </motion.span>
+              </button>
+
+              {/* Quirky reveal */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0, transition: { duration: 0.18, ease: EASE } }}
+                    transition={{ duration: 0.32, ease: EASE }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <p style={{
+                      fontFamily: "var(--font-dm-sans)",
+                      fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
+                      fontWeight: 300,
+                      fontStyle: "italic",
+                      color: "var(--color-text-secondary)",
+                      lineHeight: 1.65,
+                      margin: 0,
+                      paddingBottom: "clamp(1.25rem, 3vh, 1.75rem)",
+                      paddingLeft: "clamp(1rem, 22vw, 16rem)",
+                      maxWidth: "52ch",
+                    }}>
+                      {event.quirk}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )
+        })}
         <div aria-hidden="true" style={{ height: "1px", backgroundColor: "rgba(175, 150, 115, 0.22)" }} />
       </div>
 

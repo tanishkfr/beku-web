@@ -1,38 +1,63 @@
 "use client"
 
-import Image from "next/image"
-import { motion, useReducedMotion } from "framer-motion"
-import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
+import { motion, useReducedMotion, useInView } from "framer-motion"
+import { useRef } from "react"
+import { EASE, H_PAD } from "@/lib/tokens"
 
-const CONVERSATION_SRC = "https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=2070&q=82"
-
-const FRAGMENTS = [
+const OVERHEARD = [
   {
-    text: "Came in for one coffee. Stayed until they turned the lights down.",
-    indent: H_PAD,
-    dir: -1, // slides in from left
+    quote: "I came here to work.\nI have not worked.",
+    credit: "table near the window",
+    size: "lg",
+    indent: "0rem",
   },
   {
-    text: "There's a corner near the shelves. I've been back four times for it.",
-    indent: "clamp(3rem, 18vw, 14rem)",
-    dir: 1, // slides in from right
+    quote: "Do you think they'd notice if I stayed for dinner?",
+    credit: "said at 3 in the afternoon",
+    size: "sm",
+    indent: "clamp(3rem, 10vw, 8rem)",
   },
   {
-    text: "The Mysore Pak Croissant doesn't make sense until you're halfway through one.",
-    indent: "clamp(4rem, 22vw, 16rem)",
-    dir: -1,
+    quote: "This croissant is illegal.",
+    credit: "table 4, on a Tuesday",
+    size: "xl",
+    indent: "clamp(1.5rem, 5vw, 4rem)",
+  },
+  {
+    quote: "Is it always this quiet?\nHow is it always this quiet?",
+    credit: "a first visit",
+    size: "sm",
+    indent: "clamp(5rem, 14vw, 11rem)",
+  },
+  {
+    quote: "We said two hours.\nThat was three coffees ago.",
+    credit: "the corner table",
+    size: "lg",
+    indent: "clamp(2rem, 7vw, 6rem)",
   },
 ]
 
+const FONT_SIZE = {
+  xl: "clamp(2.125rem, 4vw, 3.25rem)",
+  lg: "clamp(1.625rem, 2.8vw, 2.5rem)",
+  sm: "clamp(1.25rem, 2vw, 1.875rem)",
+} as const
+
 export function Reviews() {
   const prefersReduced = useReducedMotion()
+  const sectionRef = useRef<HTMLElement>(null)
+  // Single trigger for the whole section — all quotes cascade together
+  const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
 
   return (
     <section
+      ref={sectionRef}
       aria-label="What people remember"
       style={{
         paddingTop: "clamp(7rem, 16vh, 12rem)",
         paddingBottom: "clamp(7rem, 16vh, 12rem)",
+        paddingLeft: H_PAD,
+        paddingRight: H_PAD,
         background: [
           "radial-gradient(ellipse 90% 40% at 50% 110%, rgba(122,84,56,0.10) 0%, transparent 100%)",
           "var(--color-bg-reviews)",
@@ -40,107 +65,103 @@ export function Reviews() {
       }}
     >
       <h2 className="sr-only">What people remember</h2>
-      {/* Opening line — slides from left */}
+
+      {/* Eyebrow */}
       <motion.p
-        initial={{ opacity: 0, x: prefersReduced ? 0 : -16 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-6%" }}
-        transition={{ duration: 0.9, ease: EASE }}
+        animate={isInView ? { opacity: 0.6 } : { opacity: 0 }}
+        transition={{ duration: 0.8, ease: EASE }}
         style={{
-          fontFamily: "var(--font-cormorant)",
-          fontSize: "clamp(1.5rem, 2.2vw, 2rem)",
+          fontFamily: "var(--font-stamp)",
+          fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
           fontWeight: 400,
-          fontStyle: "italic",
-          color: "var(--color-text-secondary)",
-          lineHeight: 1.3,
-          margin: "0 0 clamp(2rem,5vh,3.25rem) 0",
-          paddingLeft: H_PAD,
-          paddingRight: H_PAD,
+          color: "var(--color-warmwood)",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          margin: "0 0 clamp(3rem, 8vh, 6rem) 0",
         }}
       >
-        People rarely leave when they planned to.
+        Overheard at Beku
       </motion.p>
 
-      {/* Image */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-6%" }}
-        transition={{ duration: 1.1, delay: prefersReduced ? 0 : 0.1, ease: EASE }}
-        style={{ paddingLeft: IMG_PAD, paddingRight: IMG_PAD }}
-      >
-        <div style={{
-          position: "relative",
-          width: "100%",
-          height: "clamp(42vh, 55vh, 64vh)",
-          borderRadius: "6px",
-          overflow: "hidden",
-        }}>
-          <Image
-            src={CONVERSATION_SRC}
-            alt="People sitting together at Beku, warm afternoon light"
-            fill
-            sizes="(max-width: 768px) 100vw, 100vw"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-          />
-          <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
-            <filter id="reviews-grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#reviews-grain)" />
-          </svg>
-        </div>
-      </motion.div>
+      {/* Quote cascade */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {OVERHEARD.map((item, i) => {
+          const delay = prefersReduced ? 0 : i * 0.11
 
-      {/* Memory fragments — alternating slide directions */}
-      <div
-        style={{
-          marginTop: "clamp(3rem, 7vh, 5rem)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "clamp(1.75rem, 4vh, 2.75rem)",
-        }}
-        aria-label="What visitors remember"
-      >
-        {FRAGMENTS.map((fragment, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: prefersReduced ? 0 : fragment.dir * 18 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-6%" }}
-            transition={{ duration: 0.85, delay: prefersReduced ? 0 : 0.15 + i * 0.12, ease: EASE }}
-            style={{
-              marginLeft: fragment.indent,
-              maxWidth: "28ch",
-              display: "flex",
-              gap: "clamp(0.75rem, 1.5vw, 1.125rem)",
-              alignItems: "flex-start",
-            }}
-          >
+          return (
             <div
-              aria-hidden="true"
+              key={i}
               style={{
-                width: "1.5px",
-                height: "clamp(1.1rem, 1.8vh, 1.4rem)",
-                marginTop: "0.28em",
-                background: "linear-gradient(to bottom, var(--color-warmwood), transparent)",
-                opacity: 0.25 + i * 0.07,
-                flexShrink: 0,
+                marginLeft: item.indent,
+                marginBottom: i < OVERHEARD.length - 1
+                  ? "clamp(2.5rem, 6vh, 4.5rem)"
+                  : 0,
               }}
-            />
-            <p style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
-              fontWeight: 400,
-              color: "var(--color-text-secondary)",
-              lineHeight: 1.7,
-              margin: 0,
-            }}>
-              {fragment.text}
-            </p>
-          </motion.div>
-        ))}
+            >
+              {/* Short rule draws before the quote */}
+              <motion.div
+                aria-hidden="true"
+                animate={
+                  isInView
+                    ? { scaleX: 1, opacity: 0.28 }
+                    : { scaleX: 0, opacity: 0 }
+                }
+                transition={{ duration: 0.48, delay, ease: EASE }}
+                style={{
+                  height: "1px",
+                  width: "clamp(2rem, 4vw, 3.5rem)",
+                  backgroundColor: "var(--color-warmwood)",
+                  transformOrigin: "left center",
+                  marginBottom: "clamp(0.6rem, 1.2vh, 0.9rem)",
+                }}
+              />
+
+              {/* Quote */}
+              <motion.blockquote
+                animate={
+                  isInView
+                    ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                    : { opacity: 0, y: prefersReduced ? 0 : 20, filter: prefersReduced ? "blur(0px)" : "blur(6px)" }
+                }
+                transition={{ duration: 0.7, delay: delay + 0.12, ease: EASE }}
+                style={{
+                  fontFamily: "var(--font-cormorant)",
+                  fontSize: FONT_SIZE[item.size as keyof typeof FONT_SIZE],
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  color: "var(--color-ink)",
+                  lineHeight: 1.2,
+                  margin: "0 0 0.45em 0",
+                  maxWidth: "44ch",
+                }}
+              >
+                {item.quote.split("\n").map((line, li, arr) => (
+                  <span key={li}>
+                    {line}
+                    {li < arr.length - 1 && <br />}
+                  </span>
+                ))}
+              </motion.blockquote>
+
+              {/* Attribution */}
+              <motion.p
+                animate={isInView ? { opacity: 0.48 } : { opacity: 0 }}
+                transition={{ duration: 0.45, delay: delay + 0.24, ease: EASE }}
+                style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontWeight: 400,
+                  color: "var(--color-warmwood)",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  margin: 0,
+                }}
+              >
+                {item.credit}
+              </motion.p>
+            </div>
+          )
+        })}
       </div>
     </section>
   )

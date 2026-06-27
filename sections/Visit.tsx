@@ -52,7 +52,7 @@ export function Visit() {
           {[0,1,2,3,4].map((i) => (
             <motion.span
               key={i}
-              initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.4 }}
+              initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.75 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-6%" }}
               transition={{ duration: 0.3, delay: prefersReduced ? 0 : 0.1 + i * 0.07, ease: [0.34, 1.56, 0.64, 1] }}

@@ -2,10 +2,26 @@
 
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
-import { motion, useReducedMotion } from "framer-motion"
+import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { EASE, IMG_PAD, H_PAD } from "@/lib/tokens"
 
-const GATE_SRC = "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=2070&q=82"
+const FOOTER_IMAGES = [
+  {
+    src: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=900&q=82",
+    alt: "Beku at evening — warm light through the gate",
+    position: "center",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=900&q=82",
+    alt: "Books on the shelves at Beku",
+    position: "center 40%",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=900&q=82",
+    alt: "An afternoon at Beku café",
+    position: "center 60%",
+  },
+]
 
 // Question: A quiet goodbye.
 // The last image — the entrance, warm amber glow from within.
@@ -102,32 +118,45 @@ export function SiteFooter() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-4%" }}
         transition={{ duration: 1.4, ease: EASE }}
-        style={{ paddingLeft: IMG_PAD, paddingRight: IMG_PAD, paddingTop: "clamp(2.5rem, 6vh, 4rem)" }}
+        style={{
+          paddingLeft: IMG_PAD,
+          paddingRight: IMG_PAD,
+          paddingTop: "clamp(2.5rem, 6vh, 4rem)",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: "clamp(4px, 0.6vw, 8px)",
+        }}
       >
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "clamp(42vh, 56vh, 66vh)",
-            borderRadius: "6px",
-            overflow: "hidden",
-          }}
-        >
-          <Image
-            src={GATE_SRC}
-            alt="Beku at evening — warm light spilling through the gate"
-            fill
-            sizes="(max-width: 768px) 100vw, 100vw"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-          />
-          <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
+        <svg aria-hidden="true" style={{ display: "none" }}>
+          <defs>
             <filter id="footer-grain">
               <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
               <feColorMatrix type="saturate" values="0" />
             </filter>
-            <rect width="100%" height="100%" filter="url(#footer-grain)" />
-          </svg>
-        </div>
+          </defs>
+        </svg>
+        {FOOTER_IMAGES.map((img, i) => (
+          <div
+            key={i}
+            style={{
+              position: "relative",
+              height: "clamp(26vh, 36vh, 46vh)",
+              borderRadius: "6px",
+              overflow: "hidden",
+            }}
+          >
+            <Image
+              src={img.src}
+              alt={img.alt}
+              fill
+              sizes="(max-width: 768px) 33vw, 33vw"
+              style={{ objectFit: "cover", objectPosition: img.position }}
+            />
+            <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
+              <rect width="100%" height="100%" filter="url(#footer-grain)" />
+            </svg>
+          </div>
+        ))}
       </motion.div>
 
       <motion.div
@@ -199,8 +228,18 @@ export function SiteFooter() {
               onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(246, 240, 228, 0.65)" }}
               onMouseLeave={(e) => { e.currentTarget.style.color = playing ? "rgba(246, 240, 228, 0.52)" : "rgba(246, 240, 228, 0.24)" }}
             >
-              <span aria-hidden="true" style={{ fontSize: "1.15em" }}>{playing ? "♪" : "♩"}</span>
-              {playing ? "Listening" : "Ambience"}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={playing ? "listening" : "ambience"}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15, ease: EASE }}
+                  style={{ pointerEvents: "none" }}
+                >
+                  {playing ? "Listening" : "Ambience"}
+                </motion.span>
+              </AnimatePresence>
             </button>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>

@@ -235,7 +235,7 @@ function MenuRow({
           fontFamily: "var(--font-dm-sans)",
           fontSize: "clamp(0.8125rem,0.95vw,0.9375rem)",
           fontWeight: 400,
-          color: isOpen ? "var(--color-text-secondary)" : "var(--color-text-secondary)",
+          color: "var(--color-text-secondary)",
           letterSpacing: "0.01em",
           whiteSpace: "nowrap",
           flexShrink: 0,
@@ -254,7 +254,7 @@ function MenuRow({
             aria-labelledby={btnId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ height: 0, opacity: 0, transition: { height: { duration: 0.18, ease: EASE }, opacity: { duration: 0.12, ease: EASE } } }}
             transition={{
               height: { duration: 0.32, ease: EASE },
               opacity: { duration: 0.22, ease: EASE },

@@ -36,28 +36,6 @@ export function Space() {
         overflow: "hidden",
       }}
     >
-      {/* Label */}
-      {!prefersReduced && (
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.60 }}
-          viewport={{ once: true, margin: "-6%" }}
-          transition={{ duration: 1.0, ease: EASE }}
-          style={{
-            fontFamily: "var(--font-stamp)",
-            fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-            fontWeight: 400,
-            color: "var(--color-moss-signal)",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            margin: "0 0 clamp(0.75rem, 1.5vh, 1rem) 0",
-            paddingLeft: IMG_PAD,
-          }}
-        >
-          Outdoors · Under a Rain Tree
-        </motion.h2>
-      )}
-
       {/* Image with parallax */}
       <motion.div
         initial={{ opacity: prefersReduced ? 1 : 0 }}

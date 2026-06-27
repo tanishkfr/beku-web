@@ -70,7 +70,7 @@ export function Navbar() {
 
   const inDarkSection = inArrival || inDarkAbout
   // Use blur(0px) as the "off" state so CSS can tween to blur(16px)
-  const isLight = !inDarkSection && scrolled
+  const isLight = !inDarkSection
 
   const textColor = inDarkSection ? "rgba(246,240,228,0.62)" : "var(--color-text-secondary)"
   const textColorHover = inDarkSection ? CREAM : "var(--color-ink)"
