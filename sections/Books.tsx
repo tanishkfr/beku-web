@@ -114,9 +114,9 @@ function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
             >
               <span style={{
                 position: "absolute",
-                bottom: "8px",
+                top: "50%",
                 left: "50%",
-                transform: "translateX(-50%) rotate(-90deg)",
+                transform: "translate(-50%, -50%) rotate(-90deg)",
                 transformOrigin: "center center",
                 fontFamily: "var(--font-stamp)",
                 fontSize: "7px",
@@ -126,8 +126,11 @@ function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
                 textTransform: "uppercase",
                 userSelect: "none",
                 pointerEvents: "none",
+                width: `${spine.height - 20}px`,
+                textAlign: "center",
+                overflow: "hidden",
               }}>
-                {spine.title.split(" ").slice(0, 2).join(" ")}
+                {spine.title}
               </span>
               {spine.featured && (
                 <div style={{
