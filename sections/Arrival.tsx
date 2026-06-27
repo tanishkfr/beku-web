@@ -137,6 +137,12 @@ export function Arrival() {
             display: "flex",
             alignItems: "center",
             gap: "0.35em",
+            background: "rgba(14, 24, 18, 0.52)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            borderRadius: "2px",
+            border: "1px solid rgba(246, 240, 228, 0.10)",
+            padding: "0.45em 0.8em",
           }}
         >
           <span
@@ -145,7 +151,7 @@ export function Arrival() {
               fontFamily: "var(--font-stamp)",
               fontSize: "clamp(0.5rem, 0.62vw, 0.5625rem)",
               fontWeight: 400,
-              color: "rgba(246, 240, 228, 0.42)",
+              color: "rgba(246, 240, 228, 0.78)",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
             }}

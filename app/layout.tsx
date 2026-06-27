@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
+import { SplashScreen } from "@/components/SplashScreen";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -110,6 +111,7 @@ export default function RootLayout({
       </head>
       <body>
         <a href="#main-content" className="sr-skip-link">Skip to content</a>
+        <SplashScreen />
         {children}
         {/* Global paper grain — gives the page material weight */}
         <svg
