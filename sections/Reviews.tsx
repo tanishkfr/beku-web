@@ -9,31 +9,36 @@ const OVERHEARD = [
     quote: "I came here to work.\nI have not worked.",
     credit: "table near the window",
     size: "lg",
-    indent: "0rem",
+    offset: "0rem",
+    align: "left" as const,
   },
   {
     quote: "Do you think they'd notice if I stayed for dinner?",
     credit: "said at 3 in the afternoon",
     size: "sm",
-    indent: "clamp(3rem, 10vw, 8rem)",
+    offset: "clamp(1rem, 3vw, 3rem)",
+    align: "right" as const,
   },
   {
     quote: "This croissant is illegal.",
     credit: "table 4, on a Tuesday",
     size: "xl",
-    indent: "clamp(1.5rem, 5vw, 4rem)",
+    offset: "clamp(1.5rem, 5vw, 4rem)",
+    align: "left" as const,
   },
   {
     quote: "Is it always this quiet?\nHow is it always this quiet?",
     credit: "a first visit",
     size: "sm",
-    indent: "clamp(5rem, 14vw, 11rem)",
+    offset: "clamp(2rem, 6vw, 5rem)",
+    align: "right" as const,
   },
   {
     quote: "We said two hours.\nThat was three coffees ago.",
     credit: "the corner table",
     size: "lg",
-    indent: "clamp(2rem, 7vw, 6rem)",
+    offset: "clamp(2rem, 7vw, 6rem)",
+    align: "left" as const,
   },
 ]
 
@@ -87,12 +92,16 @@ export function Reviews() {
       <div style={{ display: "flex", flexDirection: "column" }}>
         {OVERHEARD.map((item, i) => {
           const delay = prefersReduced ? 0 : i * 0.11
+          const isRight = item.align === "right"
 
           return (
             <div
               key={i}
               style={{
-                marginLeft: item.indent,
+                alignSelf: isRight ? "flex-end" : "flex-start",
+                marginLeft: isRight ? 0 : item.offset,
+                marginRight: isRight ? item.offset : 0,
+                textAlign: isRight ? "right" : "left",
                 marginBottom: i < OVERHEARD.length - 1
                   ? "clamp(2.5rem, 6vh, 4.5rem)"
                   : 0,
@@ -111,8 +120,9 @@ export function Reviews() {
                   height: "1px",
                   width: "clamp(2rem, 4vw, 3.5rem)",
                   backgroundColor: "var(--color-warmwood)",
-                  transformOrigin: "left center",
+                  transformOrigin: isRight ? "right center" : "left center",
                   marginBottom: "clamp(0.6rem, 1.2vh, 0.9rem)",
+                  marginLeft: isRight ? "auto" : 0,
                 }}
               />
 

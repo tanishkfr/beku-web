@@ -15,8 +15,8 @@ export function Secret() {
     <section
       aria-label="A thought"
       style={{
-        paddingTop: "clamp(8rem, 20vh, 14rem)",
-        paddingBottom: "clamp(8rem, 20vh, 14rem)",
+        paddingTop: "clamp(5rem, 12vh, 8rem)",
+        paddingBottom: "clamp(5rem, 12vh, 8rem)",
         paddingLeft: "clamp(2rem, 8vw, 7rem)",
         paddingRight: "clamp(2rem, 8vw, 7rem)",
         backgroundColor: "var(--color-bg-secret)",
