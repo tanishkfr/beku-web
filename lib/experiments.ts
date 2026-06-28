@@ -22,6 +22,12 @@ export const EXPERIMENTS = {
   horizontalShelf: true,
   /** Footer audio becomes generative calming music; room-tone fallback when off. */
   generativeMusic: true,
+  /** Tasteful hover micro-interactions on interactive elements and type. */
+  hoverMotion: true,
+  /** Books relaid out around a slow drifting shelf "ticker" (vs the list). */
+  booksTicker: true,
+  /** On-brand custom cursor (fine-pointer, non-reduced-motion only). */
+  customCursor: true,
 } as const
 
 export type ExperimentKey = keyof typeof EXPERIMENTS
