@@ -16,11 +16,11 @@ function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
       layoutId="beku-wordmark"
       initial={{ opacity: prefersReduced ? 1 : 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{ opacity: 1 }}
       transition={prefersReduced ? { duration: 0 } : {
-        layout: { type: "spring", stiffness: 260, damping: 32 },
-        // No delay on opacity — the FLIP carries visual continuity
-        opacity: { duration: 0.35, ease: EASE },
+        // Tween, not spring — a spring across an ~8x size morph jitters.
+        layout: { duration: 0.5, ease: EASE },
+        opacity: { duration: 0.3, ease: EASE },
       }}
       style={{
         fontFamily: "var(--font-cormorant)",
@@ -30,6 +30,8 @@ function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
         letterSpacing: "0.03em",
         lineHeight: 0.86,
         whiteSpace: "nowrap",
+        transformOrigin: "left top",
+        willChange: "transform",
         margin: "0 0 clamp(1.25rem, 3vh, 2rem) 0",
       }}
     >
