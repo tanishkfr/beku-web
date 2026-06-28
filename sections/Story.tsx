@@ -3,6 +3,7 @@
 import { useRef } from "react"
 import { motion, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion"
 import { EASE, H_PAD } from "@/lib/tokens"
+import { DwellNote } from "@/components/DwellNote"
 
 const SENTENCE = "People order one coffee and end up staying for lunch."
 const WORDS = SENTENCE.split(" ")
@@ -97,6 +98,10 @@ export function Story() {
       >
         Nobody gets hurried out.
       </motion.p>
+
+      <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)", paddingLeft: H_PAD, paddingRight: H_PAD }}>
+        Most regulars mean to leave by four.
+      </DwellNote>
     </section>
   )
 }
