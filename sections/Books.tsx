@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useMotionValue, useSpring, AnimatePresence } 
 import { useRef, useState, useCallback } from "react"
 import { EASE, H_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
+import { DwellNote } from "@/components/DwellNote"
 
 const SPINES = [
   { color: "#3D6147", title: "Ways of Seeing", author: "John Berger", lean: -4, height: 148 },
@@ -627,6 +628,10 @@ export function Books() {
           }}>
             The shelves change often. That&apos;s part of the point.
           </p>
+
+          <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
+            Half of these were left behind, not bought.
+          </DwellNote>
         </motion.div>
       </div>
     </section>

@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion"
 import { OpenStatus } from "@/components/OpenStatus"
+import { DwellNote } from "@/components/DwellNote"
 import { EASE, H_PAD } from "@/lib/tokens"
 
 // Question: How do I find Beku, and when is it open?
@@ -273,6 +274,10 @@ export function Visit() {
       >
         Just beyond the traffic.
       </motion.p>
+
+      <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
+        If you reach the temple, you&apos;ve gone a little too far.
+      </DwellNote>
     </section>
   )
 }

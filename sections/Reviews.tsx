@@ -3,6 +3,7 @@
 import { motion, useReducedMotion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { EASE, H_PAD } from "@/lib/tokens"
+import { DwellNote } from "@/components/DwellNote"
 
 const OVERHEARD = [
   {
@@ -118,6 +119,10 @@ export function Reviews() {
           </div>
         ))}
       </div>
+
+      <DwellNote style={{ marginTop: "clamp(2rem, 5vh, 3.5rem)", maxWidth: "46ch" }}>
+        We started writing these down by accident.
+      </DwellNote>
     </section>
   )
 }

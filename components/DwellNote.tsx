@@ -11,12 +11,14 @@ interface Props {
   style?: CSSProperties
 }
 
+const DEFAULT_DELAY = 5500
+
 /**
  * A quiet aside that fades in only after the visitor has lingered on a section
  * — a reward for not hurrying, never announced. Opacity-only, reserves its line
  * so nothing shifts. No-op when the experiment is off. (Beku's slowness reward.)
  */
-export function DwellNote({ children, delay = 7000, style }: Props) {
+export function DwellNote({ children, delay = DEFAULT_DELAY, style }: Props) {
   const prefersReduced = useReducedMotion()
   const ref = useRef<HTMLParagraphElement>(null)
   const [revealed, setRevealed] = useState(false)

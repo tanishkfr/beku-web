@@ -4,6 +4,7 @@ import Image from "next/image"
 import { motion, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
+import { DwellNote } from "@/components/DwellNote"
 
 const EVENTS_SRC = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2070&q=82"
 
@@ -194,6 +195,10 @@ export function Events() {
           @beku.blr on Instagram
           <span aria-hidden="true" style={{ fontSize: "0.85em", opacity: 0.6 }}>↗</span>
         </motion.a>
+
+        <DwellNote style={{ marginTop: "clamp(1.5rem, 3.5vh, 2.25rem)" }}>
+          No tickets. You just turn up.
+        </DwellNote>
       </div>
     </section>
   )

@@ -5,22 +5,23 @@ import { motion, useScroll, useReducedMotion } from "framer-motion"
 import { EXPERIMENTS } from "@/lib/experiments"
 import { CREAM } from "@/lib/tokens"
 
-// The homepage as a sequence of rooms. Index matches the order of
-// <section> elements inside #main-content (Secret is included as "A thought").
+// The homepage as a sequence of rooms — named the way someone who works here
+// might point you through the house, not generic section labels. Index matches
+// the order of <section> elements inside #main-content.
 const ROOMS = [
-  "Arrival",
-  "Story",
-  "Food",
-  "Space",
-  "Books",
-  "Reviews",
-  "A thought",
-  "Events",
-  "Visit",
+  "The gate",
+  "Staying",
+  "The counter",
+  "Under the tree",
+  "The shelves",
+  "Overheard",
+  "A secret",
+  "What's on",
+  "Find us",
 ]
 
 /**
- * A slim margin rail (Zone 1) showing which room you're in — book-style, not a
+ * A slim right-margin rail showing which room you're in — book-style, not a
  * dashboard bar. Desktop only. No-op when the experiment is off.
  */
 export function RoomRail() {
@@ -72,13 +73,13 @@ export function RoomRail() {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: "fixed",
-        left: "clamp(1rem, 2.5vw, 2rem)",
+        right: "clamp(1rem, 2.5vw, 2rem)",
         top: "50%",
         transform: "translateY(-50%)",
         zIndex: 40,
         flexDirection: "column",
         gap: "0.85rem",
-        alignItems: "flex-start",
+        alignItems: "flex-end",
         padding: "0.5rem",
       }}
     >
@@ -92,6 +93,7 @@ export function RoomRail() {
             tabIndex={-1}
             style={{
               display: "flex",
+              flexDirection: "row-reverse", // tick on the right, label grows left
               alignItems: "center",
               gap: "0.7rem",
               background: "none",
@@ -116,16 +118,18 @@ export function RoomRail() {
             />
             {/* Label — only the active (or, on hover, all) */}
             <motion.span
-              animate={{ opacity: show ? 1 : 0, x: show ? 0 : -4 }}
+              animate={{ opacity: show ? 1 : 0, x: show ? 0 : 4 }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               style={{
-                fontFamily: "var(--font-stamp)",
-                fontSize: "0.5rem",
+                fontFamily: isActive ? "var(--font-cormorant)" : "var(--font-stamp)",
+                fontStyle: isActive ? "italic" : "normal",
+                fontSize: isActive ? "0.8125rem" : "0.5rem",
                 fontWeight: 400,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
+                letterSpacing: isActive ? "0.01em" : "0.12em",
+                textTransform: isActive ? "none" : "uppercase",
                 color: isActive ? inkActive : ink,
                 whiteSpace: "nowrap",
+                textAlign: "right",
                 pointerEvents: "none",
               }}
             >
@@ -141,7 +145,7 @@ export function RoomRail() {
           aria-hidden="true"
           style={{
             position: "absolute",
-            left: "0.5rem",
+            right: "0.5rem",
             top: 0,
             bottom: 0,
             width: "1px",

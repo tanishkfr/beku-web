@@ -5,6 +5,7 @@ import Image from "next/image"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
+import { DwellNote } from "@/components/DwellNote"
 
 const ZOMATO_URL = "https://www.zomato.com/bangalore/beku-cafe-bakery-bookstore-1-jp-nagar-bangalore"
 const FOOD_SRC = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=2070&q=82"
@@ -642,6 +643,10 @@ export function Food() {
           </motion.span>
         </motion.a>
       </motion.div>
+
+      <DwellNote style={{ marginTop: "clamp(1.5rem, 3.5vh, 2.25rem)" }}>
+        The second tray comes out just after four.
+      </DwellNote>
     </section>
   )
 }
