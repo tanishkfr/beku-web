@@ -1,34 +1,32 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
 import { EASE, CREAM, H_PAD } from "@/lib/tokens"
 
 const NAV_LINKS = [
-  { label: "Food", href: "/#menu" },
-  { label: "Books", href: "/#books" },
+  { label: "Food",   href: "/#menu" },
+  { label: "Books",  href: "/#books" },
   { label: "Events", href: "/#events" },
-  { label: "Visit", href: "/#visit" },
-  { label: "About", href: "/about" },
+  { label: "Visit",  href: "/#visit" },
+  { label: "About",  href: "/about" },
 ]
 
 export function Navbar() {
   const { heroBekuVisible } = useArrivalContext()
 
-  const [scrolled, setScrolled] = useState(false)
-  const [inArrival, setInArrival] = useState(true)
+  const [inArrival, setInArrival]     = useState(true)
   const [inDarkAbout, setInDarkAbout] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  // Track which nav link is hovered for the indicator line
+  const [mobileOpen, setMobileOpen]   = useState(false)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
 
   const { scrollY } = useScroll()
+  // Unused — kept in case future scroll-shadow is added
+  const [_scrolled, setScrolled] = useState(false)
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 60))
 
-  // Arrival section detection — rootMargin shrinks the observer zone so the
-  // transition fires cleanly rather than at the first pixel of exit
   useEffect(() => {
     const arrival = document.querySelector('[aria-label="Arrival"]')
     if (!arrival) { setInArrival(false); return }
@@ -40,7 +38,6 @@ export function Navbar() {
     return () => obs.disconnect()
   }, [])
 
-  // Dark-section detection (About page header, Footer) — initialize false, not true
   useEffect(() => {
     const darkEls = document.querySelectorAll("[data-navbar-dark]")
     if (!darkEls.length) return
@@ -52,7 +49,6 @@ export function Navbar() {
       },
       { threshold: 0 }
     )
-    // Initialize all as false — not yet determined
     darkEls.forEach((el) => { states.set(el, false); obs.observe(el) })
     return () => obs.disconnect()
   }, [])
@@ -68,13 +64,22 @@ export function Navbar() {
     return () => { document.body.style.overflow = "" }
   }, [mobileOpen])
 
-  const inDarkSection = inArrival || inDarkAbout
-  // Use blur(0px) as the "off" state so CSS can tween to blur(16px)
-  const isLight = !inDarkSection
+  const isDark = inArrival || inDarkAbout
 
-  const textColor = inDarkSection ? "rgba(246,240,228,0.62)" : "var(--color-text-secondary)"
-  const textColorHover = inDarkSection ? CREAM : "var(--color-ink)"
-  const lineColor = (mobileOpen || inDarkSection) ? CREAM : "var(--color-ink)"
+  // ── Navbar shell ──────────────────────────────────────────────────────────
+  // Dark sections: subtle dark glass so cream text always reads against the image.
+  // Light sections: familiar frosted cream.
+  const navBg     = isDark ? "rgba(18, 30, 22, 0.38)" : "rgba(246, 240, 228, 0.94)"
+  const navBlur   = "blur(16px)"
+  const navBorder = isDark
+    ? "1px solid rgba(246, 240, 228, 0.08)"
+    : "1px solid rgba(216, 208, 188, 0.45)"
+
+  // ── Link colours ──────────────────────────────────────────────────────────
+  // One base colour per mode; hover = full opacity of same colour.
+  const linkBase  = isDark ? "rgba(246, 240, 228, 0.82)" : "rgba(24, 40, 32, 0.68)"
+  const linkHover = isDark ? "rgba(246, 240, 228, 1.0)"  : "rgba(24, 40, 32, 1.0)"
+  const lineColor = (mobileOpen || isDark) ? CREAM : "var(--color-ink)"
 
   return (
     <>
@@ -82,23 +87,19 @@ export function Navbar() {
         aria-label="Site header"
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
+          top: 0, left: 0, right: 0,
           zIndex: 50,
           display: "flex",
           alignItems: "center",
           padding: `1.25rem ${H_PAD}`,
-          // blur(0px) → blur(16px) interpolates; "none" → blur does not
-          backgroundColor: isLight ? "rgba(246,240,228,0.92)" : "transparent",
-          backdropFilter: isLight ? "blur(18px)" : "blur(0px)",
-          WebkitBackdropFilter: isLight ? "blur(18px)" : "blur(0px)",
-          borderBottom: isLight ? "1px solid rgba(216,208,188,0.45)" : "1px solid transparent",
-          transition: "background-color 380ms ease, border-color 380ms ease, backdrop-filter 380ms ease",
+          backgroundColor: navBg,
+          backdropFilter: navBlur,
+          WebkitBackdropFilter: navBlur,
+          borderBottom: navBorder,
+          transition: "background-color 350ms ease, border-color 350ms ease",
         }}
       >
-        {/* Wordmark slot — always in layout so nav links don't jump.
-            The FLIP animation picks it up here when heroBekuVisible → false. */}
+        {/* Wordmark — FLIP target */}
         <div style={{ flex: "0 0 auto" }}>
           <AnimatePresence>
             {!heroBekuVisible && (
@@ -120,10 +121,10 @@ export function Navbar() {
                     fontFamily: "var(--font-cormorant)",
                     fontSize: "1.3125rem",
                     fontWeight: 400,
-                    color: (mobileOpen || inDarkSection) ? CREAM : "var(--color-forest)",
+                    color: (mobileOpen || isDark) ? CREAM : "var(--color-forest)",
                     letterSpacing: "0.04em",
                     textDecoration: "none",
-                    transition: "color 600ms ease",
+                    transition: "color 350ms ease",
                     display: "block",
                     whiteSpace: "nowrap",
                   }}
@@ -135,7 +136,6 @@ export function Navbar() {
           </AnimatePresence>
         </div>
 
-        {/* Spacer */}
         <div style={{ flex: 1 }} />
 
         {/* Desktop nav */}
@@ -144,43 +144,46 @@ export function Navbar() {
           className="hidden md:flex items-center"
           style={{ gap: "2rem" }}
         >
-          {NAV_LINKS.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                fontFamily: "var(--font-dm-sans)",
-                fontSize: "0.8125rem",
-                fontWeight: 300,
-                color: hoveredLink === href ? textColorHover : textColor,
-                letterSpacing: "0.07em",
-                textDecoration: "none",
-                position: "relative",
-                paddingBottom: "2px",
-                transition: "color 240ms ease",
-              }}
-              onMouseEnter={() => setHoveredLink(href)}
-              onMouseLeave={() => setHoveredLink(null)}
-            >
-              {label}
-              {/* Underline that draws in from left on hover */}
-              <motion.span
-                aria-hidden="true"
-                animate={{ scaleX: hoveredLink === href ? 1 : 0 }}
-                transition={{ duration: 0.22, ease: EASE }}
+          {NAV_LINKS.map(({ label, href }) => {
+            const isHovered = hoveredLink === href
+            return (
+              <Link
+                key={href}
+                href={href}
                 style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "0.75px",
-                  backgroundColor: inDarkSection ? "rgba(246,240,228,0.35)" : "rgba(61,97,71,0.4)",
-                  transformOrigin: "left center",
-                  display: "block",
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "0.8125rem",
+                  fontWeight: 300,
+                  color: isHovered ? linkHover : linkBase,
+                  letterSpacing: "0.07em",
+                  textDecoration: "none",
+                  position: "relative",
+                  paddingBottom: "2px",
+                  transition: "color 220ms ease",
                 }}
-              />
-            </Link>
-          ))}
+                onMouseEnter={() => setHoveredLink(href)}
+                onMouseLeave={() => setHoveredLink(null)}
+              >
+                {label}
+                {/* Underline draws in from left on hover */}
+                <motion.span
+                  aria-hidden="true"
+                  animate={{ scaleX: isHovered ? 1 : 0 }}
+                  transition={{ duration: 0.2, ease: EASE }}
+                  style={{
+                    position: "absolute",
+                    bottom: 0, left: 0, right: 0,
+                    height: "0.75px",
+                    backgroundColor: isDark
+                      ? "rgba(246, 240, 228, 0.45)"
+                      : "rgba(24, 40, 32, 0.35)",
+                    transformOrigin: "left center",
+                    display: "block",
+                  }}
+                />
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Hamburger */}
@@ -208,9 +211,9 @@ export function Navbar() {
               key={i}
               animate={
                 mobileOpen
-                  ? i === 0 ? { rotate: 45, y: 6, opacity: 1 }
+                  ? i === 0 ? { rotate: 45,  y: 6,  opacity: 1 }
                   : i === 1 ? { opacity: 0, scaleX: 0 }
-                  : { rotate: -45, y: -6, opacity: 1 }
+                  :           { rotate: -45, y: -6, opacity: 1 }
                   : { rotate: 0, y: 0, opacity: 1, scaleX: 1 }
               }
               transition={{ duration: 0.28, ease: EASE }}
@@ -221,7 +224,7 @@ export function Navbar() {
                 backgroundColor: lineColor,
                 borderRadius: "2px",
                 transformOrigin: "center",
-                transition: "background-color 600ms ease, width 280ms ease",
+                transition: "background-color 350ms ease, width 280ms ease",
               }}
             />
           ))}
@@ -242,7 +245,7 @@ export function Navbar() {
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "rgba(24,40,32,0.98)",
+              backgroundColor: "rgba(24, 40, 32, 0.98)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               zIndex: 49,
@@ -299,7 +302,7 @@ export function Navbar() {
               transition={{ duration: 0.4, delay: 0.44, ease: EASE }}
               style={{
                 position: "absolute",
-                bottom: "clamp(2.5rem,6vh,4rem)",
+                bottom: "clamp(2.5rem, 6vh, 4rem)",
                 left: H_PAD,
                 display: "flex",
                 flexDirection: "column",
@@ -310,7 +313,7 @@ export function Navbar() {
                 fontFamily: "var(--font-dm-sans)",
                 fontSize: "0.6875rem",
                 fontWeight: 300,
-                color: "rgba(246,240,228,0.32)",
+                color: "rgba(246, 240, 228, 0.32)",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 margin: 0,
@@ -321,7 +324,7 @@ export function Navbar() {
                 fontFamily: "var(--font-dm-sans)",
                 fontSize: "0.6875rem",
                 fontWeight: 300,
-                color: "rgba(246,240,228,0.20)",
+                color: "rgba(246, 240, 228, 0.20)",
                 letterSpacing: "0.06em",
                 margin: 0,
               }}>
