@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
+import { EXPERIMENTS } from "@/lib/experiments"
 import { EASE, CREAM, H_PAD } from "@/lib/tokens"
 
 const NAV_LINKS = [
@@ -13,6 +14,12 @@ const NAV_LINKS = [
   { label: "Visit",  href: "/#visit" },
   { label: "About",  href: "/about" },
 ]
+
+// When the room rail handles in-page wayfinding, the desktop navbar steps back
+// to just the wordmark + About. Flip roomsNav off and the full nav returns.
+const DESKTOP_LINKS = EXPERIMENTS.roomsNav
+  ? NAV_LINKS.filter((l) => l.href === "/about")
+  : NAV_LINKS
 
 export function Navbar() {
   const { heroBekuVisible } = useArrivalContext()
@@ -144,7 +151,7 @@ export function Navbar() {
           className="hidden md:flex items-center"
           style={{ gap: "2rem" }}
         >
-          {NAV_LINKS.map(({ label, href }) => {
+          {DESKTOP_LINKS.map(({ label, href }) => {
             const isHovered = hoveredLink === href
             return (
               <Link
