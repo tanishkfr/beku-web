@@ -141,6 +141,49 @@ img {
   border-radius: 2px;
 }
 
+/* --- Time-aware light (experiment: timeAwareLight) ---
+   Shifts the palette's temperature to match the visitor's local hour.
+   Scoped to light mode so it never fights the dark-mode overrides below.
+   Midday = the default tokens (no override needed). */
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  :root[data-phase="morning"] {
+    --color-paper: #F4F1EA;
+    --color-bg-arrival: #1A2C24;
+    --color-bg-story: #E8E6D4;
+    --color-bg-space: #C8DCC2;
+    --color-bg-food: #F7F6F0;
+    --color-bg-books: #E2DCC2;
+    --color-bg-reviews: #DAD4BE;
+    --color-bg-secret: #F2F1EC;
+    --color-bg-events: #DCDAD4;
+    --color-bg-visit: #CCC8BA;
+  }
+  :root[data-phase="golden"] {
+    --color-paper: #F2E7D0;
+    --color-bg-arrival: #16241C;
+    --color-bg-story: #ECDFBE;
+    --color-bg-space: #C2D2A8;
+    --color-bg-food: #F7EFDC;
+    --color-bg-books: #E2D2A8;
+    --color-bg-reviews: #DCC9A0;
+    --color-bg-secret: #F3EDDD;
+    --color-bg-events: #DED6C2;
+    --color-bg-visit: #CCC0A0;
+  }
+  :root[data-phase="night"] {
+    --color-paper: #EFE6D2;
+    --color-bg-arrival: #101E16;
+    --color-bg-story: #E4DAC0;
+    --color-bg-space: #B8C8AE;
+    --color-bg-food: #F0E8D6;
+    --color-bg-books: #DCD0AE;
+    --color-bg-reviews: #D6C8A6;
+    --color-bg-secret: #EDE8D8;
+    --color-bg-events: #D8D2C4;
+    --color-bg-visit: #C6C0AC;
+  }
+}
+
 /* --- Dark mode --- */
 @media (prefers-color-scheme: dark) {
   :root {

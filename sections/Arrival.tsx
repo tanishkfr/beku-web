@@ -4,6 +4,7 @@ import React from "react"
 import Image from "next/image"
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
+import { OpenStatus } from "@/components/OpenStatus"
 import { EASE, H_PAD, CREAM, CREAM_DIM, CREAM_MUTED } from "@/lib/tokens"
 
 const HERO_SRC = "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?auto=format&fit=crop&w=2070&q=85"
@@ -217,16 +218,18 @@ export function Arrival() {
               paddingBottom: "clamp(1.25rem, 2.5vh, 1.875rem)",
             }}
           >
-            <p style={{
-              fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-              fontWeight: 400,
-              color: CREAM_MUTED,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}>
-              Open every day · 11am – 11pm
+            <p style={{ margin: 0, color: CREAM_MUTED }}>
+              <OpenStatus
+                fallback="Open every day · 11am – 11pm"
+                style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
+                  fontWeight: 400,
+                  color: CREAM_MUTED,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
+              />
             </p>
             <span
               lang="kn"

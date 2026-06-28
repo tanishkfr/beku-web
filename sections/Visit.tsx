@@ -1,6 +1,7 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
+import { OpenStatus } from "@/components/OpenStatus"
 import { EASE, H_PAD } from "@/lib/tokens"
 
 // Question: How do I find Beku, and when is it open?
@@ -242,6 +243,19 @@ export function Visit() {
             }}>
               Open every day<br />
               11am – 11pm
+            </p>
+            <p style={{ margin: "0.75em 0 0 0", color: "var(--color-text-muted)" }}>
+              <OpenStatus
+                fallback=""
+                style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontWeight: 400,
+                  color: "var(--color-text-muted)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                }}
+              />
             </p>
           </div>
         </div>
