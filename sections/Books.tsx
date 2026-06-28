@@ -3,6 +3,7 @@
 import { motion, useReducedMotion, useMotionValue, useSpring, AnimatePresence } from "framer-motion"
 import { useRef, useState, useCallback } from "react"
 import { EASE, H_PAD } from "@/lib/tokens"
+import { EXPERIMENTS } from "@/lib/experiments"
 
 const SPINES = [
   { color: "#3D6147", title: "Ways of Seeing", author: "John Berger", lean: -4, height: 148 },
@@ -139,6 +140,48 @@ function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
             </motion.div>
           </motion.div>
         ))}
+
+        {/* Artifact: cut-paper shelf marker at the end of the row */}
+        {EXPERIMENTS.artifactVocab && (
+          <div
+            aria-hidden="true"
+            style={{
+              alignSelf: "flex-end",
+              marginLeft: "clamp(0.75rem, 2vw, 1.5rem)",
+              marginBottom: "2px",
+              transform: "rotate(-1.5deg)",
+              backgroundColor: "#F8F2E4",
+              border: "1px solid rgba(175,150,115,0.5)",
+              borderRadius: 0,
+              padding: "0.32rem 0.5rem",
+              boxShadow: "0 1px 3px rgba(40,20,8,0.12)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{
+              fontFamily: "var(--font-stamp)",
+              fontSize: "0.4375rem",
+              color: "var(--color-moss-signal)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              display: "block",
+            }}>
+              Fiction
+            </span>
+            <span style={{
+              fontFamily: "var(--font-stamp)",
+              fontSize: "0.4375rem",
+              color: "var(--color-text-muted)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              display: "block",
+              marginTop: "0.2em",
+              opacity: 0.7,
+            }}>
+              Borrowed twelve times
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Info strip below shelf plank */}

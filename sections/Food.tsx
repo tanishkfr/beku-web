@@ -4,12 +4,15 @@ import { useState, useId } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
+import { EXPERIMENTS } from "@/lib/experiments"
 
 const ZOMATO_URL = "https://www.zomato.com/bangalore/beku-cafe-bakery-bookstore-1-jp-nagar-bangalore"
 const FOOD_SRC = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=2070&q=82"
 
 type MenuItem = {
   name: string
+  /** Kannada name — revealed on hover/open. Owner to verify before launch. */
+  kn?: string
   description: string
   price: string
   note: string
@@ -19,24 +22,28 @@ type MenuItem = {
 const DRINKS: MenuItem[] = [
   {
     name: "Filter Coffee",
+    kn: "ಫಿಲ್ಟರ್ ಕಾಫಿ",
     description: "House filter, dark and clean.",
     price: "₹140",
     note: "Made fresh every hour. Ask for the ratio if you're curious.",
   },
   {
     name: "Vietnamese Iced Coffee",
+    kn: "ವಿಯೆಟ್ನಾಮೀಸ್ ಐಸ್ಡ್ ಕಾಫಿ",
     description: "Cold brewed, condensed milk, over ice.",
     price: "₹180",
     note: "Cold brewed overnight. Ask for extra-strong if you need it.",
   },
   {
     name: "Strawberry Matcha",
+    kn: "ಸ್ಟ್ರಾಬೆರಿ ಮಾಚಾ",
     description: "Ceremonial matcha, strawberry purée, oat milk.",
     price: "₹220",
     note: "Made to order. Pairs well with the lemon tea cake.",
   },
   {
     name: "White Chocolate & Rose Latte",
+    kn: "ವೈಟ್ ಚಾಕೊಲೇಟ್ ಮತ್ತು ರೋಸ್ ಲಾಟೆ",
     description: "House espresso, white chocolate, rose, whole milk.",
     price: "₹240",
     note: "Floral without being sweet. More coffee than you'd expect.",
@@ -44,12 +51,14 @@ const DRINKS: MenuItem[] = [
   },
   {
     name: "Hazelnut Cold Coffee",
+    kn: "ಹೇಜಲ್‌ನಟ್ ಕೋಲ್ಡ್ ಕಾಫಿ",
     description: "House espresso, hazelnut, whole milk.",
     price: "₹200",
     note: "The hazelnut is restrained. More coffee than sweet.",
   },
   {
     name: "Affogato",
+    kn: "ಅಫೊಗಾಟೊ",
     description: "Double espresso over one scoop of vanilla.",
     price: "₹160",
     note: "Two minutes. Drink it before it turns into something else.",
@@ -59,6 +68,7 @@ const DRINKS: MenuItem[] = [
 const KITCHEN: MenuItem[] = [
   {
     name: "Mysore Pak Croissant",
+    kn: "ಮೈಸೂರು ಪಾಕ್ ಕ್ರೋಸಾಂ",
     description: "Laminated with Mysore Pak filling.",
     price: "₹180",
     note: "The filling comes from a recipe we won't be sharing.",
@@ -66,30 +76,35 @@ const KITCHEN: MenuItem[] = [
   },
   {
     name: "Chilli Croissant",
+    kn: "ಚಿಲ್ಲಿ ಕ್ರೋಸಾಂ",
     description: "Spiced chilli filling, buttery layers.",
     price: "₹160",
     note: "Best warm. Ask if they've just come out.",
   },
   {
     name: "Arrabiata Pasta",
+    kn: "ಅರಬಿಯಾಟಾ ಪಾಸ್ಟಾ",
     description: "Spicy tomato, made in the kitchen.",
     price: "₹280",
     note: "On the thicker side. Ask for the bread to go with it.",
   },
   {
     name: "Parmesan Fries",
+    kn: "ಪಾರ್ಮೆಸನ್ ಫ್ರೈಸ್",
     description: "Shoestring fries, parmesan, fresh herbs.",
     price: "₹220",
     note: "The kind you keep reaching for.",
   },
   {
     name: "Lemon Tea Cake",
+    kn: "ಲೆಮನ್ ಟೀ ಕೇಕ್",
     description: "Glazed, tart, with black tea notes.",
     price: "₹140",
     note: "Goes particularly well with filter coffee.",
   },
   {
     name: "Curd Rice",
+    kn: "ಮೊಸರನ್ನ",
     description: "With potato pepper fry on the side.",
     price: "₹180",
     note: "The kind of thing you didn't expect to order and then did.",
@@ -135,6 +150,8 @@ function MenuRow({
   const panelId = `menu-panel-${id}`
   const btnId = `menu-btn-${id}`
   const num = String(index + 1).padStart(2, "0")
+  const [hovered, setHovered] = useState(false)
+  const showKannada = EXPERIMENTS.kannadaLayer && !!item.kn && (hovered || isOpen)
 
   return (
     <motion.div
@@ -179,8 +196,10 @@ function MenuRow({
           alignItems: "baseline",
           transition: "background-color 200ms ease",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(192,107,48,0.04)" }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent" }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(192,107,48,0.04)"; setHovered(true) }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; setHovered(false) }}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
       >
         {/* Index */}
         <span style={{
@@ -216,6 +235,25 @@ function MenuRow({
               {item.name}
             </span>
             {item.isBekuOriginal && !prefersReduced && <OriginalMark />}
+            {EXPERIMENTS.kannadaLayer && item.kn && (
+              <span
+                lang="kn"
+                aria-hidden="true"
+                style={{
+                  fontFamily: "var(--font-cormorant)",
+                  fontSize: "clamp(0.8125rem, 1.2vw, 1rem)",
+                  fontWeight: 300,
+                  color: "var(--color-text-muted)",
+                  opacity: showKannada ? 0.6 : 0,
+                  transform: showKannada ? "translateX(0)" : "translateX(-3px)",
+                  transition: "opacity 280ms ease, transform 280ms ease",
+                  marginLeft: "0.15em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {item.kn}
+              </span>
+            )}
           </span>
           <span style={{
             display: "block",
@@ -410,6 +448,7 @@ export function Food() {
         style={{
           marginLeft: `calc(-1 * ${H_PAD})`,
           marginRight: `calc(-1 * ${H_PAD})`,
+          position: "relative",
           paddingLeft: IMG_PAD,
           paddingRight: IMG_PAD,
           marginBottom: "clamp(3rem, 7vh, 5rem)",
@@ -437,6 +476,68 @@ export function Food() {
             <rect width="100%" height="100%" filter="url(#food-grain)" />
           </svg>
         </div>
+
+        {/* Artifact: bakery label, pinned to the photo's corner */}
+        {EXPERIMENTS.artifactVocab && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(-0.85rem, -1.6vh, -1.1rem)",
+              left: "clamp(1.75rem, 5.5vw, 4rem)",
+              transform: "rotate(-2.2deg)",
+              backgroundColor: "var(--color-offwhite)",
+              border: "1px solid rgba(175,150,115,0.5)",
+              borderRadius: "2px",
+              padding: "0.65rem 0.9rem 0.7rem",
+              boxShadow: "2px 4px 18px rgba(40,20,8,0.12), 0 1px 3px rgba(40,20,8,0.06)",
+              maxWidth: "13.5rem",
+              zIndex: 3,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4em", marginBottom: "0.3em" }}>
+              <svg width="9" height="11" viewBox="0 0 9 11" fill="none">
+                <line x1="4.5" y1="10" x2="4.5" y2="2" stroke="#3D6147" strokeWidth="0.7" strokeLinecap="round" />
+                <ellipse cx="2.6" cy="4.6" rx="1.7" ry="0.7" transform="rotate(-32 2.6 4.6)" stroke="#3D6147" strokeWidth="0.6" fill="none" />
+                <ellipse cx="6.4" cy="4.6" rx="1.7" ry="0.7" transform="rotate(32 6.4 4.6)" stroke="#3D6147" strokeWidth="0.6" fill="none" />
+                <ellipse cx="2.9" cy="6.8" rx="1.4" ry="0.6" transform="rotate(-32 2.9 6.8)" stroke="#3D6147" strokeWidth="0.6" fill="none" />
+                <ellipse cx="6.1" cy="6.8" rx="1.4" ry="0.6" transform="rotate(32 6.1 6.8)" stroke="#3D6147" strokeWidth="0.6" fill="none" />
+              </svg>
+              <span style={{
+                fontFamily: "var(--font-stamp)",
+                fontSize: "0.5rem",
+                fontWeight: 400,
+                color: "var(--color-warmwood)",
+                letterSpacing: "0.13em",
+                textTransform: "uppercase",
+                opacity: 0.75,
+              }}>
+                From the oven
+              </span>
+            </div>
+            <p style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+              fontWeight: 400,
+              fontStyle: "italic",
+              color: "var(--color-ink)",
+              lineHeight: 1.15,
+              margin: "0 0 0.15em 0",
+            }}>
+              Mysore Pak Croissant
+            </p>
+            <p style={{
+              fontFamily: "var(--font-dm-sans)",
+              fontSize: "0.6875rem",
+              fontWeight: 300,
+              color: "var(--color-text-muted)",
+              lineHeight: 1.4,
+              margin: 0,
+            }}>
+              with Mysore Pak filling
+            </p>
+          </div>
+        )}
       </motion.div>
 
       {/* Two-column menu */}
