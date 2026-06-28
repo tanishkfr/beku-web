@@ -226,7 +226,7 @@ export function Arrival() {
               textTransform: "uppercase",
               margin: 0,
             }}>
-              Open daily · 11:00 – 23:00
+              Open every day · 11am – 11pm
             </p>
             <span
               lang="kn"
