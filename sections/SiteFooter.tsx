@@ -4,6 +4,125 @@ import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { EASE, IMG_PAD, H_PAD } from "@/lib/tokens"
+import { EXPERIMENTS } from "@/lib/experiments"
+
+// ── Audio engines ───────────────────────────────────────────────────────────
+
+// Generated reverb impulse — decaying stereo noise.
+function makeImpulse(ctx: AudioContext, seconds: number, decay: number) {
+  const len = Math.floor(ctx.sampleRate * seconds)
+  const buf = ctx.createBuffer(2, len, ctx.sampleRate)
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buf.getChannelData(ch)
+    for (let i = 0; i < len; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay)
+    }
+  }
+  return buf
+}
+
+// D major pentatonic across octaves 4–5 — never dissonant.
+const PENTATONIC = [293.66, 329.63, 369.99, 440.0, 493.88, 587.33, 659.25]
+
+// Original ambient café room-tone (fallback when generativeMusic is off).
+function buildRoomTone(ctx: AudioContext, master: GainNode, sources: AudioScheduledSourceNode[]) {
+  // Layer 1: room tone (60–250 Hz)
+  const roomBuf = ctx.createBuffer(1, ctx.sampleRate * 6, ctx.sampleRate)
+  const roomData = roomBuf.getChannelData(0)
+  for (let i = 0; i < roomBuf.length; i++) roomData[i] = Math.random() * 2 - 1
+  const room = ctx.createBufferSource()
+  room.buffer = roomBuf; room.loop = true
+  const roomHp = ctx.createBiquadFilter(); roomHp.type = "highpass"; roomHp.frequency.value = 60
+  const roomLp = ctx.createBiquadFilter(); roomLp.type = "lowpass"; roomLp.frequency.value = 250
+  const roomGain = ctx.createGain(); roomGain.gain.value = 0.03
+  room.connect(roomHp); roomHp.connect(roomLp); roomLp.connect(roomGain); roomGain.connect(master)
+  room.start(); sources.push(room)
+
+  // Layer 2: conversation murmur (300–2200 Hz) with AM
+  const murBuf = ctx.createBuffer(1, ctx.sampleRate * 8, ctx.sampleRate)
+  const murData = murBuf.getChannelData(0)
+  for (let i = 0; i < murBuf.length; i++) murData[i] = Math.random() * 2 - 1
+  const mur = ctx.createBufferSource()
+  mur.buffer = murBuf; mur.loop = true
+  const murHp = ctx.createBiquadFilter(); murHp.type = "highpass"; murHp.frequency.value = 300
+  const murLp = ctx.createBiquadFilter(); murLp.type = "lowpass"; murLp.frequency.value = 2200
+  const murGain = ctx.createGain(); murGain.gain.value = 0.038
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.18
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.012
+  lfo.connect(lfoGain); lfoGain.connect(murGain.gain); lfo.start()
+  mur.connect(murHp); murHp.connect(murLp); murLp.connect(murGain); murGain.connect(master)
+  mur.start(); sources.push(mur); sources.push(lfo)
+
+  // Layer 3: presence (3000–7000 Hz)
+  const airBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate)
+  const airData = airBuf.getChannelData(0)
+  for (let i = 0; i < airBuf.length; i++) airData[i] = Math.random() * 2 - 1
+  const air = ctx.createBufferSource()
+  air.buffer = airBuf; air.loop = true
+  const airHp = ctx.createBiquadFilter(); airHp.type = "highpass"; airHp.frequency.value = 3000
+  const airLp = ctx.createBiquadFilter(); airLp.type = "lowpass"; airLp.frequency.value = 7000
+  const airGain = ctx.createGain(); airGain.gain.value = 0.008
+  air.connect(airHp); airHp.connect(airLp); airLp.connect(airGain); airGain.connect(master)
+  air.start(); sources.push(air)
+}
+
+// Generative calming music — slow open pad + sparse pentatonic bells + reverb.
+// Same Web Audio architecture; returns nothing, schedules via scheduleRef.
+function buildMusic(
+  ctx: AudioContext,
+  master: GainNode,
+  sources: AudioScheduledSourceNode[],
+  scheduleRef: { current: ReturnType<typeof setTimeout> | null },
+) {
+  // Reverb bus for space
+  const reverb = ctx.createConvolver()
+  reverb.buffer = makeImpulse(ctx, 3.0, 2.2)
+  const reverbGain = ctx.createGain(); reverbGain.gain.value = 0.85
+  reverb.connect(reverbGain); reverbGain.connect(master)
+
+  // Pad: an open D–A–E chord, two detuned voices each, through a lowpass
+  // with a very slow LFO on the cutoff so the chord breathes.
+  const padFilter = ctx.createBiquadFilter()
+  padFilter.type = "lowpass"; padFilter.frequency.value = 680
+  const padGain = ctx.createGain(); padGain.gain.value = 0.042
+  padFilter.connect(padGain); padGain.connect(master); padGain.connect(reverb)
+
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.05
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 220
+  lfo.connect(lfoGain); lfoGain.connect(padFilter.frequency); lfo.start()
+  sources.push(lfo)
+
+  const padNotes = [146.83, 220.0, 329.63] // D3, A3, E4
+  padNotes.forEach((f) => {
+    [-4, 4].forEach((detune) => {
+      const o = ctx.createOscillator()
+      o.type = "triangle"
+      o.frequency.value = f
+      o.detune.value = detune
+      o.connect(padFilter)
+      o.start()
+      sources.push(o)
+    })
+  })
+
+  // Sparse bells: one soft sine note from the pentatonic, at slow random gaps.
+  const playNote = () => {
+    const now = ctx.currentTime
+    const f = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)]
+    const o = ctx.createOscillator()
+    o.type = "sine"
+    o.frequency.value = f
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0, now)
+    g.gain.linearRampToValueAtTime(0.06, now + 0.4)            // soft attack
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 3.2)     // long release
+    o.connect(g); g.connect(master); g.connect(reverb)
+    o.start(now); o.stop(now + 3.4)
+    sources.push(o)
+    scheduleRef.current = setTimeout(playNote, 2200 + Math.random() * 3800)
+  }
+  scheduleRef.current = setTimeout(playNote, 1200)
+}
 
 const FOOTER_IMAGES = [
   {
@@ -31,15 +150,20 @@ export function SiteFooter() {
   const prefersReduced = useReducedMotion()
   const [playing, setPlaying] = useState(false)
   const audioCtxRef = useRef<AudioContext | null>(null)
-  const sourcesRef = useRef<AudioBufferSourceNode[]>([])
+  const sourcesRef = useRef<AudioScheduledSourceNode[]>([])
   const masterGainRef = useRef<GainNode | null>(null)
+  const scheduleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    return () => { audioCtxRef.current?.close() }
+    return () => {
+      if (scheduleRef.current) clearTimeout(scheduleRef.current)
+      audioCtxRef.current?.close()
+    }
   }, [])
 
   const toggleSound = () => {
     if (playing) {
+      if (scheduleRef.current) { clearTimeout(scheduleRef.current); scheduleRef.current = null }
       if (masterGainRef.current && audioCtxRef.current) {
         masterGainRef.current.gain.linearRampToValueAtTime(0, audioCtxRef.current.currentTime + 0.8)
         setTimeout(() => {
@@ -62,45 +186,11 @@ export function SiteFooter() {
         master.connect(ctx.destination)
         masterGainRef.current = master
 
-        // Layer 1: room tone (60–250 Hz)
-        const roomBuf = ctx.createBuffer(1, ctx.sampleRate * 6, ctx.sampleRate)
-        const roomData = roomBuf.getChannelData(0)
-        for (let i = 0; i < roomBuf.length; i++) roomData[i] = Math.random() * 2 - 1
-        const room = ctx.createBufferSource()
-        room.buffer = roomBuf
-        room.loop = true
-        const roomHp = ctx.createBiquadFilter(); roomHp.type = "highpass"; roomHp.frequency.value = 60
-        const roomLp = ctx.createBiquadFilter(); roomLp.type = "lowpass"; roomLp.frequency.value = 250
-        const roomGain = ctx.createGain(); roomGain.gain.value = 0.03
-        room.connect(roomHp); roomHp.connect(roomLp); roomLp.connect(roomGain); roomGain.connect(master)
-        room.start(); sourcesRef.current.push(room)
-
-        // Layer 2: conversation murmur (300–2200 Hz) with AM
-        const murBuf = ctx.createBuffer(1, ctx.sampleRate * 8, ctx.sampleRate)
-        const murData = murBuf.getChannelData(0)
-        for (let i = 0; i < murBuf.length; i++) murData[i] = Math.random() * 2 - 1
-        const mur = ctx.createBufferSource()
-        mur.buffer = murBuf; mur.loop = true
-        const murHp = ctx.createBiquadFilter(); murHp.type = "highpass"; murHp.frequency.value = 300
-        const murLp = ctx.createBiquadFilter(); murLp.type = "lowpass"; murLp.frequency.value = 2200
-        const murGain = ctx.createGain(); murGain.gain.value = 0.038
-        const lfo = ctx.createOscillator(); lfo.frequency.value = 0.18
-        const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.012
-        lfo.connect(lfoGain); lfoGain.connect(murGain.gain); lfo.start()
-        mur.connect(murHp); murHp.connect(murLp); murLp.connect(murGain); murGain.connect(master)
-        mur.start(); sourcesRef.current.push(mur)
-
-        // Layer 3: presence (3000–7000 Hz)
-        const airBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate)
-        const airData = airBuf.getChannelData(0)
-        for (let i = 0; i < airBuf.length; i++) airData[i] = Math.random() * 2 - 1
-        const air = ctx.createBufferSource()
-        air.buffer = airBuf; air.loop = true
-        const airHp = ctx.createBiquadFilter(); airHp.type = "highpass"; airHp.frequency.value = 3000
-        const airLp = ctx.createBiquadFilter(); airLp.type = "lowpass"; airLp.frequency.value = 7000
-        const airGain = ctx.createGain(); airGain.gain.value = 0.008
-        air.connect(airHp); airHp.connect(airLp); airLp.connect(airGain); airGain.connect(master)
-        air.start(); sourcesRef.current.push(air)
+        if (EXPERIMENTS.generativeMusic) {
+          buildMusic(ctx, master, sourcesRef.current, scheduleRef)
+        } else {
+          buildRoomTone(ctx, master, sourcesRef.current)
+        }
 
         setPlaying(true)
       } catch {
@@ -108,6 +198,10 @@ export function SiteFooter() {
       }
     }
   }
+
+  const soundNoun = EXPERIMENTS.generativeMusic ? "music" : "ambient café sound"
+  const idleLabel = EXPERIMENTS.generativeMusic ? "Music" : "Ambience"
+  const liveLabel = EXPERIMENTS.generativeMusic ? "Playing" : "Listening"
 
   const CREAM = "#F6F0E4"
 
@@ -208,7 +302,7 @@ export function SiteFooter() {
           {!prefersReduced && (
             <button
               onClick={toggleSound}
-              aria-label={playing ? "Stop ambient café sound" : "Play ambient café sound"}
+              aria-label={playing ? `Stop ${soundNoun}` : `Play ${soundNoun}`}
               style={{
                 background: "none",
                 border: "none",
@@ -230,14 +324,14 @@ export function SiteFooter() {
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
-                  key={playing ? "listening" : "ambience"}
+                  key={playing ? "live" : "idle"}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15, ease: EASE }}
                   style={{ pointerEvents: "none" }}
                 >
-                  {playing ? "Listening" : "Ambience"}
+                  {playing ? liveLabel : idleLabel}
                 </motion.span>
               </AnimatePresence>
             </button>

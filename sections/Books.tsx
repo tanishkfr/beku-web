@@ -45,6 +45,16 @@ const SHELF_BOOKS = [
   { title: "The God of Small Things", author: "Arundhati Roy" },
 ]
 
+// A few more titles so the horizontal shelf has something to scan.
+// (Vertical fallback uses SHELF_BOOKS only, so reverting stays clean.)
+const HORIZONTAL_SHELF = [
+  ...SHELF_BOOKS,
+  { title: "A Fine Balance", author: "Rohinton Mistry" },
+  { title: "Em and the Big Hoom", author: "Jerry Pinto" },
+  { title: "The Argumentative Indian", author: "Amartya Sen" },
+  { title: "Beloved", author: "Toni Morrison" },
+]
+
 function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
   const [activeSpine, setActiveSpine] = useState<number | null>(null)
 
@@ -499,51 +509,117 @@ export function Books() {
           viewport={{ once: true, margin: "-6%" }}
           transition={{ duration: 0.8, delay: prefersReduced ? 0 : 0.18, ease: EASE }}
         >
-          <h3 style={{
-            fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-            fontWeight: 400, color: "var(--color-moss-signal)", letterSpacing: "0.15em",
-            textTransform: "uppercase", margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0", opacity: 0.58,
+          <div style={{
+            display: "flex", alignItems: "baseline", justifyContent: "space-between",
+            gap: "1rem", margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0",
           }}>
-            Also on the shelves
-          </h3>
+            <h3 style={{
+              fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+              fontWeight: 400, color: "var(--color-moss-signal)", letterSpacing: "0.15em",
+              textTransform: "uppercase", margin: 0, opacity: 0.58,
+            }}>
+              Also on the shelves
+            </h3>
+            {EXPERIMENTS.horizontalShelf && (
+              <span aria-hidden="true" style={{
+                fontFamily: "var(--font-stamp)", fontSize: "0.4375rem",
+                color: "var(--color-text-muted)", letterSpacing: "0.12em",
+                textTransform: "uppercase", opacity: 0.5, whiteSpace: "nowrap",
+              }}>
+                Scan →
+              </span>
+            )}
+          </div>
 
-          <ul
-            aria-label="Other books on the shelves"
-            style={{ listStyle: "none", padding: 0, margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0" }}
-          >
-            {SHELF_BOOKS.map((b, i) => (
-              <motion.li
-                key={b.title}
-                initial={{ opacity: 0, x: prefersReduced ? 0 : -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                whileTap={prefersReduced ? {} : { x: 5, opacity: 0.65 }}
-                viewport={{ once: true, margin: "-6%" }}
-                transition={{ duration: 0.6, delay: prefersReduced ? 0 : 0.22 + i * 0.07, ease: EASE }}
-                style={{
-                  display: "flex", alignItems: "baseline", gap: "1rem",
-                  padding: "0.65em 0",
-                  borderTop: "1px solid rgba(175,150,115,0.18)",
-                  WebkitTapHighlightColor: "transparent",
-                }}
-              >
-                <span style={{
-                  fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
-                  fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
-                  lineHeight: 1.3, flex: "1 1 auto", minWidth: 0,
-                }}>
-                  {b.title}
-                </span>
-                <span style={{
-                  fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
-                  fontWeight: 300, color: "var(--color-text-muted)",
-                  whiteSpace: "nowrap", flexShrink: 0,
-                }}>
-                  {b.author}
-                </span>
-              </motion.li>
-            ))}
-            <li aria-hidden="true" style={{ borderTop: "1px solid rgba(175,150,115,0.18)", height: 0 }} />
-          </ul>
+          {EXPERIMENTS.horizontalShelf ? (
+            /* Horizontal shelf — scroll-snap strip you scan like real spines */
+            <div
+              aria-label="Other books on the shelves"
+              tabIndex={0}
+              className="beku-shelf-scroll"
+              style={{
+                display: "flex",
+                gap: "clamp(0.85rem, 1.8vw, 1.4rem)",
+                overflowX: "auto",
+                scrollSnapType: "x mandatory",
+                padding: "0 0 1rem 0",
+                margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0",
+                scrollbarWidth: "thin",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {HORIZONTAL_SHELF.map((b) => (
+                <div
+                  key={b.title}
+                  tabIndex={0}
+                  aria-label={`${b.title} by ${b.author}`}
+                  style={{
+                    scrollSnapAlign: "start",
+                    flex: "0 0 auto",
+                    width: "clamp(150px, 42vw, 185px)",
+                    borderLeft: "1px solid rgba(175,150,115,0.35)",
+                    paddingLeft: "clamp(0.7rem, 1.5vw, 1rem)",
+                    minHeight: "5.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.2rem)",
+                    fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
+                    lineHeight: 1.25, marginBottom: "0.4em",
+                  }}>
+                    {b.title}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
+                    fontWeight: 300, color: "var(--color-text-muted)",
+                  }}>
+                    {b.author}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ul
+              aria-label="Other books on the shelves"
+              style={{ listStyle: "none", padding: 0, margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0" }}
+            >
+              {SHELF_BOOKS.map((b, i) => (
+                <motion.li
+                  key={b.title}
+                  initial={{ opacity: 0, x: prefersReduced ? 0 : -8 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  whileTap={prefersReduced ? {} : { x: 5, opacity: 0.65 }}
+                  viewport={{ once: true, margin: "-6%" }}
+                  transition={{ duration: 0.6, delay: prefersReduced ? 0 : 0.22 + i * 0.07, ease: EASE }}
+                  style={{
+                    display: "flex", alignItems: "baseline", gap: "1rem",
+                    padding: "0.65em 0",
+                    borderTop: "1px solid rgba(175,150,115,0.18)",
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+                    fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
+                    lineHeight: 1.3, flex: "1 1 auto", minWidth: 0,
+                  }}>
+                    {b.title}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
+                    fontWeight: 300, color: "var(--color-text-muted)",
+                    whiteSpace: "nowrap", flexShrink: 0,
+                  }}>
+                    {b.author}
+                  </span>
+                </motion.li>
+              ))}
+              <li aria-hidden="true" style={{ borderTop: "1px solid rgba(175,150,115,0.18)", height: 0 }} />
+            </ul>
+          )}
 
           <p style={{
             fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.8125rem, 1vw, 0.9375rem)",

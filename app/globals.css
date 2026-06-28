@@ -134,6 +134,18 @@ img {
   height: auto;
 }
 
+/* --- Horizontal shelf scrollbar (experiment: horizontalShelf) --- */
+.beku-shelf-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+.beku-shelf-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.beku-shelf-scroll::-webkit-scrollbar-thumb {
+  background: rgba(175, 150, 115, 0.4);
+  border-radius: 2px;
+}
+
 /* --- Focus visible --- */
 :focus-visible {
   outline: 2px solid var(--color-moss);
