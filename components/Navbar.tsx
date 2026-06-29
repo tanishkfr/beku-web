@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useReducedMotion } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
-import { EXPERIMENTS } from "@/lib/experiments"
 import { EASE, CREAM, H_PAD } from "@/lib/tokens"
 
 const NAV_LINKS = [
@@ -15,15 +14,10 @@ const NAV_LINKS = [
   { label: "About",  href: "/about" },
 ]
 
-// When the room rail handles in-page wayfinding, the desktop navbar steps back
-// to just the wordmark + About. Flip roomsNav off and the full nav returns.
-const DESKTOP_LINKS = EXPERIMENTS.roomsNav
-  ? NAV_LINKS.filter((l) => l.href === "/about")
-  : NAV_LINKS
-
 export function Navbar() {
   const { heroBekuVisible } = useArrivalContext()
   const prefersReduced = useReducedMotion()
+  const { scrollYProgress } = useScroll()
 
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
@@ -117,7 +111,7 @@ export function Navbar() {
           className="hidden md:flex items-center"
           style={{ gap: "2rem" }}
         >
-          {DESKTOP_LINKS.map(({ label, href }) => {
+          {NAV_LINKS.map(({ label, href }) => {
             const isHovered = hoveredLink === href
             return (
               <Link
@@ -200,6 +194,24 @@ export function Navbar() {
             />
           ))}
         </button>
+
+        {/* Reading-progress hairline — sits on the navbar's bottom edge and
+            fills left-to-right as you move down the page. */}
+        {!prefersReduced && (
+          <motion.span
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: "-1px",
+              height: "1.5px",
+              backgroundColor: CREAM,
+              transformOrigin: "left center",
+              scaleX: scrollYProgress,
+            }}
+          />
+        )}
       </header>
 
       {/* Mobile overlay */}

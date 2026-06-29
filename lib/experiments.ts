@@ -10,8 +10,6 @@
 export const EXPERIMENTS = {
   /** Global palette + open/closed state shift with the visitor's local time. */
   timeAwareLight: true,
-  /** Room-aware margin progress rail + navigational identity. */
-  roomsNav: true,
   /** Kannada names revealed on hover/focus across menu + labels. */
   kannadaLayer: true,
   /** Build out the documented-but-missing physical artifacts. */
