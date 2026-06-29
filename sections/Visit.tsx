@@ -36,9 +36,13 @@ export function Visit() {
         ].join(", "),
       }}
     >
-      {/* Google rating — animated stars */}
-      <motion.div
+      {/* Google rating — animated stars, links to Google reviews */}
+      <motion.a
         {...itemReveal(0)}
+        href={links.googleReviews}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${rating.value} stars on Google · ${rating.countDisplay} reviews — open in Google Maps`}
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -48,10 +52,20 @@ export function Visit() {
           backgroundColor: "rgba(61,97,71,0.08)",
           border: "1px solid rgba(61,97,71,0.20)",
           borderRadius: "2px",
+          textDecoration: "none",
+          transition: "border-color 200ms ease, background-color 200ms ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = "rgba(61,97,71,0.45)"
+          e.currentTarget.style.backgroundColor = "rgba(61,97,71,0.14)"
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "rgba(61,97,71,0.20)"
+          e.currentTarget.style.backgroundColor = "rgba(61,97,71,0.08)"
         }}
       >
         {/* Stars animate in one by one */}
-        <span aria-label={`${rating.value} stars`} style={{ display: "flex", gap: "1px" }}>
+        <span aria-hidden="true" style={{ display: "flex", gap: "1px" }}>
           {[0,1,2,3,4].map((i) => (
             <motion.span
               key={i}
@@ -88,7 +102,7 @@ export function Visit() {
         }}>
           · {rating.countDisplay} reviews
         </span>
-      </motion.div>
+      </motion.a>
 
       {/* Place name */}
       <motion.h2
@@ -120,168 +134,198 @@ export function Visit() {
         Café · Bakery · Bookstore
       </motion.p>
 
-      {/* Exhibition label — WHERE / WHEN */}
-      <motion.div
-        {...itemReveal(0.16)}
-        style={{
-          maxWidth: "clamp(280px, 55%, 480px)",
-          marginBottom: "clamp(2.5rem, 6vh, 4rem)",
-        }}
-      >
-        <div aria-hidden="true" style={{
-          width: "clamp(2.5rem, 5vw, 4rem)",
-          height: "1px",
-          backgroundColor: "var(--color-divider)",
-          marginBottom: "clamp(1.5rem, 4vh, 2.25rem)",
-          opacity: 0.7,
-        }} />
+      {/* Two-column: info left, map right */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "clamp(3rem, 6vw, 5rem)",
+        alignItems: "start",
+      }}>
+        {/* Left — WHERE / WHEN + quote */}
+        <div>
+          <motion.div
+            {...itemReveal(0.16)}
+            style={{ marginBottom: "clamp(2.5rem, 6vh, 4rem)" }}
+          >
+            <div aria-hidden="true" style={{
+              width: "clamp(2.5rem, 5vw, 4rem)",
+              height: "1px",
+              backgroundColor: "var(--color-divider)",
+              marginBottom: "clamp(1.5rem, 4vh, 2.25rem)",
+              opacity: 0.7,
+            }} />
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
-          gap: "clamp(2rem, 6vw, 4rem)",
-          alignItems: "start",
-        }}>
-          {/* Where */}
-          <div>
-            <p style={{
-              fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-              fontWeight: 500,
-              color: "var(--color-label)",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              margin: "0 0 0.6em 0",
-              opacity: 0.9,
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
+              gap: "clamp(2rem, 6vw, 4rem)",
+              alignItems: "start",
             }}>
-              Where
-            </p>
-            <address style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
-              fontWeight: 400,
-              color: "var(--color-text-secondary)",
-              lineHeight: 1.65,
-              fontStyle: "normal",
-            }}>
-              {address.lines.map((line, i) => (
-                <span key={i}>
-                  {line}
-                  {i < address.lines.length - 1 && <br />}
-                </span>
-              ))}
-            </address>
-            <p style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
-              fontWeight: 300,
-              color: "var(--color-text-muted)",
-              lineHeight: 1.6,
-              margin: "0.75em 0 0 0",
-            }}>
-              Look for the rain tree at the gate.
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "0.75em", flexWrap: "wrap" }}>
-              <a
-                href={links.maps}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.3em",
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
-                  fontWeight: 500,
-                  color: "var(--color-label)",
-                  textDecoration: "none",
-                  opacity: 1,
-                  transition: "opacity 200ms ease",
-                  letterSpacing: "0.02em",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7" }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1" }}
-              >
-                Open in Maps <span aria-hidden="true">↗</span>
-              </a>
-              <a
-                href={`tel:${contact.phoneE164}`}
-                style={{
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
-                  fontWeight: 400,
-                  color: "var(--color-text-muted)",
-                  textDecoration: "none",
-                  opacity: 0.75,
-                  transition: "opacity 200ms ease",
-                  letterSpacing: "0.02em",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "1" }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75" }}
-              >
-                {contact.phoneDisplay}
-              </a>
-            </div>
-          </div>
-
-          {/* When */}
-          <div>
-            <p style={{
-              fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-              fontWeight: 500,
-              color: "var(--color-label)",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              margin: "0 0 0.6em 0",
-              opacity: 0.9,
-            }}>
-              When
-            </p>
-            <p style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
-              fontWeight: 400,
-              color: "var(--color-text-secondary)",
-              lineHeight: 1.65,
-              margin: 0,
-            }}>
-              {hours.daysLabel}<br />
-              {hours.rangeLabel}
-            </p>
-            <p style={{ margin: "0.75em 0 0 0", color: "var(--color-text-muted)" }}>
-              <OpenStatus
-                fallback=""
-                style={{
+              {/* Where */}
+              <div>
+                <p style={{
                   fontFamily: "var(--font-stamp)",
                   fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-                  fontWeight: 400,
-                  color: "var(--color-text-muted)",
-                  letterSpacing: "0.1em",
+                  fontWeight: 500,
+                  color: "var(--color-label)",
+                  letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                }}
-              />
-            </p>
-          </div>
+                  margin: "0 0 0.6em 0",
+                  opacity: 0.9,
+                }}>
+                  Where
+                </p>
+                <address style={{
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
+                  fontWeight: 400,
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.65,
+                  fontStyle: "normal",
+                }}>
+                  {address.lines.map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < address.lines.length - 1 && <br />}
+                    </span>
+                  ))}
+                </address>
+                <p style={{
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
+                  fontWeight: 300,
+                  color: "var(--color-text-muted)",
+                  lineHeight: 1.6,
+                  margin: "0.75em 0 0 0",
+                }}>
+                  Look for the rain tree at the gate.
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "0.75em", flexWrap: "wrap" }}>
+                  <a
+                    href={links.maps}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.3em",
+                      fontFamily: "var(--font-dm-sans)",
+                      fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
+                      fontWeight: 500,
+                      color: "var(--color-label)",
+                      textDecoration: "none",
+                      opacity: 1,
+                      transition: "opacity 200ms ease",
+                      letterSpacing: "0.02em",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7" }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1" }}
+                  >
+                    Open in Maps <span aria-hidden="true">↗</span>
+                  </a>
+                  <a
+                    href={`tel:${contact.phoneE164}`}
+                    style={{
+                      fontFamily: "var(--font-dm-sans)",
+                      fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
+                      fontWeight: 400,
+                      color: "var(--color-text-muted)",
+                      textDecoration: "none",
+                      opacity: 0.75,
+                      transition: "opacity 200ms ease",
+                      letterSpacing: "0.02em",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "1" }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75" }}
+                  >
+                    {contact.phoneDisplay}
+                  </a>
+                </div>
+              </div>
+
+              {/* When */}
+              <div>
+                <p style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontWeight: 500,
+                  color: "var(--color-label)",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  margin: "0 0 0.6em 0",
+                  opacity: 0.9,
+                }}>
+                  When
+                </p>
+                <p style={{
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
+                  fontWeight: 400,
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}>
+                  {hours.daysLabel}<br />
+                  {hours.rangeLabel}
+                </p>
+                <p style={{ margin: "0.75em 0 0 0", color: "var(--color-text-muted)" }}>
+                  <OpenStatus
+                    fallback=""
+                    style={{
+                      fontFamily: "var(--font-stamp)",
+                      fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                      fontWeight: 400,
+                      color: "var(--color-text-muted)",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                    }}
+                  />
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.p
+            {...itemReveal(0.38)}
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(1rem, 1.6vw, 1.375rem)",
+              fontWeight: 400,
+              color: "var(--color-text-muted)",
+              margin: "0 0 0 0",
+            }}
+          >
+            Just beyond the traffic.
+          </motion.p>
+
+          <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
+            If you reach the temple, you&apos;ve gone a little too far.
+          </DwellNote>
         </div>
-      </motion.div>
 
-      <motion.p
-        {...itemReveal(0.38)}
-        style={{
-          fontFamily: "var(--font-cormorant)",
-          fontSize: "clamp(1rem, 1.6vw, 1.375rem)",
-          fontWeight: 400,
-          color: "var(--color-text-muted)",
-          margin: "clamp(2.5rem, 6vh, 4rem) 0 0 0",
-        }}
-      >
-        Just beyond the traffic.
-      </motion.p>
-
-      <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
-        If you reach the temple, you&apos;ve gone a little too far.
-      </DwellNote>
+        {/* Right — Google Maps embed */}
+        <motion.div
+          {...itemReveal(0.22)}
+          style={{
+            position: "sticky",
+            top: "clamp(6rem, 12vh, 8rem)",
+            borderRadius: "6px",
+            overflow: "hidden",
+            border: "1px solid var(--color-divider)",
+          }}
+        >
+          <iframe
+            src={`https://maps.google.com/maps?q=${address.geo.latitude},${address.geo.longitude}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+            width="100%"
+            height="420"
+            style={{ border: 0, display: "block" }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Beku on Google Maps"
+          />
+        </motion.div>
+      </div>
     </section>
   )
 }

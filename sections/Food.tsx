@@ -84,7 +84,7 @@ const KITCHEN: MenuItem[] = [
     note: "Best warm. Ask if they've just come out.",
   },
   {
-    name: "Arrabiata Pasta",
+    name: "Arrabbiata Pasta",
     kn: "ಅರಬಿಯಾಟಾ ಪಾಸ್ಟಾ",
     description: "Spicy tomato, made in the kitchen.",
     price: "₹280",
@@ -381,7 +381,7 @@ function MenuColumn({
           letterSpacing: "0.1em",
           textTransform: "uppercase",
         }}>
-          {items.length} to choose
+          {items.length} house favourites
         </span>
       </motion.div>
 
@@ -671,7 +671,7 @@ export function Food() {
       </motion.div>
 
       <DwellNote style={{ marginTop: "clamp(1.5rem, 3.5vh, 2.25rem)" }}>
-        The second tray comes out just after four.
+        Fresh bakes return around 4pm.
       </DwellNote>
     </section>
   )

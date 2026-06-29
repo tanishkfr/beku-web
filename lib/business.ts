@@ -64,6 +64,8 @@ export const links = {
     "https://www.zomato.com/bangalore/beku-cafe-bakery-bookstore-1-jp-nagar-bangalore",
   /** Google Maps share link for the storefront. */
   maps: "https://share.google/Axv26Yaqm85EMtgoK",
+  /** Direct link to the Google Maps reviews tab. */
+  googleReviews: "https://share.google/Axv26Yaqm85EMtgoK",
 } as const
 
 // ── Identity ─────────────────────────────────────────────────────────────────
@@ -84,7 +86,7 @@ export const business = {
 // before launch. Kept here (not inline) so nothing reads as a stale, dated
 // one-off — the featured item is intentionally recurring, never a past date.
 export const events = {
-  categories: "Film screenings. Book swaps. Coffee cuppings.",
+  categories: "Film screenings. Book swaps. Coffee sippings.",
   /** A recurring example — evergreen, never goes stale. */
   featured: {
     pinnedLabel: "On the board",

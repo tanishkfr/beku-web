@@ -6,7 +6,7 @@ import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
 import { OpenStatus } from "@/components/OpenStatus"
 import { EASE, H_PAD, CREAM, CREAM_DIM, CREAM_MUTED } from "@/lib/tokens"
-import { hours, rating } from "@/lib/business"
+import { hours, rating, links } from "@/lib/business"
 
 const HERO_SRC = "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?auto=format&fit=crop&w=2070&q=85"
 const INTERIOR_SRC = "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2070&q=82"
@@ -132,8 +132,12 @@ export function Arrival() {
         </motion.p>
 
         {/* Google rating */}
-        <motion.div
+        <motion.a
           {...fade(0.8)}
+          href={links.googleReviews}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${rating.value} stars on Google · ${rating.countDisplay} reviews — open in Google Maps`}
           style={{
             position: "absolute",
             top: "clamp(5.25rem, 10.5vh, 7.25rem)",
@@ -147,10 +151,14 @@ export function Arrival() {
             borderRadius: "2px",
             border: "1px solid rgba(246, 240, 228, 0.10)",
             padding: "0.45em 0.8em",
+            textDecoration: "none",
+            transition: "border-color 200ms ease",
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(246, 240, 228, 0.28)" }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(246, 240, 228, 0.10)" }}
         >
           <span
-            aria-label={`${rating.value} stars on Google`}
+            aria-hidden="true"
             style={{
               fontFamily: "var(--font-stamp)",
               fontSize: "clamp(0.5rem, 0.62vw, 0.5625rem)",
@@ -162,7 +170,7 @@ export function Arrival() {
           >
             {rating.value} ★ · {rating.countDisplay} reviews
           </span>
-        </motion.div>
+        </motion.a>
 
         {/* Hero text — lower third. This is what the FLIP watches. */}
         <div
