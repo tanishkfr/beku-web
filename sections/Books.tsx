@@ -1,13 +1,12 @@
 "use client"
 
-import React, { useState } from "react"
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
+import React, { useState, useRef, useEffect } from "react"
+import { motion, useReducedMotion, AnimatePresence, useMotionValue, useAnimationFrame } from "framer-motion"
 import { EASE, H_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
 import { DwellNote } from "@/components/DwellNote"
 
-type Pick = {
-  picker: string
+type Shelf = {
   title: string
   author: string
   note: string
@@ -15,9 +14,10 @@ type Pick = {
   color: string
 }
 
-const PICKS: Pick[] = [
+// Three that keep leaving the shelf — described in Beku's own voice,
+// no named individuals.
+const FEATURED: Shelf[] = [
   {
-    picker: "Ishita",
     title: "The Remains of the Day",
     author: "Kazuo Ishiguro",
     note: "The kind of book that makes the afternoon feel longer. We've kept a copy near the counter for over a year. It keeps leaving, and it keeps finding its way back.",
@@ -25,7 +25,6 @@ const PICKS: Pick[] = [
     color: "#C06B30",
   },
   {
-    picker: "Arjun",
     title: "Ghachar Ghochar",
     author: "Vivek Shanbhag",
     note: "Short, but it stays with you. A family, a business, a slow unravelling. Reads in one sitting. Pairs well with a filter coffee and a free afternoon.",
@@ -33,7 +32,6 @@ const PICKS: Pick[] = [
     color: "#7A5438",
   },
   {
-    picker: "Meera",
     title: "Ways of Seeing",
     author: "John Berger",
     note: "Leave it open on any page and something useful looks back at you. We've tried keeping this one for the shelf. It keeps leaving.",
@@ -50,8 +48,6 @@ const SHELF_BOOKS = [
   { title: "The God of Small Things", author: "Arundhati Roy" },
 ]
 
-// A few more titles so the horizontal shelf has something to scan.
-// (Vertical fallback uses SHELF_BOOKS only, so reverting stays clean.)
 const HORIZONTAL_SHELF = [
   ...SHELF_BOOKS,
   { title: "A Fine Balance", author: "Rohinton Mistry" },
@@ -74,26 +70,54 @@ const TICKER_SPINES = [
   { title: "Beloved", author: "Toni Morrison", color: "#3D5147", height: 162 },
 ]
 
-const PICK_INDEX = new Map(PICKS.map((p, i) => [p.title, i]))
+const FEATURED_INDEX = new Map(FEATURED.map((p, i) => [p.title, i]))
 
-function ShelfTicker({ onSelectPick }: { onSelectPick: (i: number) => void }) {
+function ShelfTicker({ onSelect }: { onSelect: (i: number) => void }) {
+  const prefersReduced = useReducedMotion()
   const doubled = [...TICKER_SPINES, ...TICKER_SPINES]
+  const x = useMotionValue(0)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const halfRef = useRef(0)
+  const pausedRef = useRef(false)
+
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) halfRef.current = trackRef.current.scrollWidth / 2
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [])
+
+  useAnimationFrame((_, delta) => {
+    if (prefersReduced || pausedRef.current) return
+    const half = halfRef.current
+    if (!half) return
+    let next = x.get() - (delta / 1000) * 40 // 40px/s — calm but clearly moving
+    if (next <= -half) next += half
+    x.set(next)
+  })
+
   return (
     <div
       className="beku-ticker"
+      onMouseEnter={() => { pausedRef.current = true }}
+      onMouseLeave={() => { pausedRef.current = false }}
       style={{
         marginLeft: `calc(-1 * ${H_PAD})`,
         marginRight: `calc(-1 * ${H_PAD})`,
         position: "relative",
-        overflow: "hidden",
+        overflowX: prefersReduced ? "auto" : "hidden",
+        overflowY: "hidden",
         height: "232px",
         WebkitMaskImage: "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)",
         maskImage: "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)",
       }}
     >
-      <div
-        className="beku-ticker-track"
+      <motion.div
+        ref={trackRef}
         style={{
+          x,
           display: "flex",
           alignItems: "flex-end",
           gap: "clamp(8px, 1vw, 14px)",
@@ -103,13 +127,13 @@ function ShelfTicker({ onSelectPick }: { onSelectPick: (i: number) => void }) {
         }}
       >
         {doubled.map((s, i) => {
-          const pickIdx = PICK_INDEX.get(s.title)
+          const featuredIdx = FEATURED_INDEX.get(s.title)
           return (
             <button
               key={i}
               className="beku-spine"
               aria-label={`${s.title} by ${s.author}`}
-              onClick={() => { if (pickIdx !== undefined) onSelectPick(pickIdx) }}
+              onClick={() => { if (featuredIdx !== undefined) onSelect(featuredIdx) }}
               style={{
                 flex: "0 0 auto",
                 width: "clamp(26px, 2.4vw, 40px)",
@@ -133,7 +157,7 @@ function ShelfTicker({ onSelectPick }: { onSelectPick: (i: number) => void }) {
                 transformOrigin: "center center",
                 fontFamily: "var(--font-stamp)",
                 fontSize: "8px",
-                color: "rgba(246,240,228,0.55)",
+                color: "rgba(246,240,228,0.62)",
                 whiteSpace: "nowrap",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -144,21 +168,21 @@ function ShelfTicker({ onSelectPick }: { onSelectPick: (i: number) => void }) {
               }}>
                 {s.title}
               </span>
-              {pickIdx !== undefined && (
+              {featuredIdx !== undefined && (
                 <span aria-hidden="true" style={{
                   position: "absolute", top: 0, left: 0, right: 0, height: "4px",
-                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backgroundColor: "rgba(255,255,255,0.22)",
                 }} />
               )}
             </button>
           )
         })}
-      </div>
+      </motion.div>
 
       {/* Shelf plank */}
       <div aria-hidden="true" style={{
         position: "absolute", left: 0, right: 0, bottom: "18px",
-        height: "3px", backgroundColor: "rgba(130,100,65,0.28)",
+        height: "3px", backgroundColor: "rgba(130,100,65,0.3)",
       }} />
     </div>
   )
@@ -167,8 +191,8 @@ function ShelfTicker({ onSelectPick }: { onSelectPick: (i: number) => void }) {
 export function Books() {
   const prefersReduced = useReducedMotion()
   const [active, setActive] = useState(0)
-  const [hoveredPick, setHoveredPick] = useState<number | null>(null)
-  const pick = PICKS[active]
+  const [hovered, setHovered] = useState<number | null>(null)
+  const book = FEATURED[active]
 
   return (
     <section
@@ -185,14 +209,14 @@ export function Books() {
       {/* Eyebrow */}
       <motion.h2
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 0.6 }}
+        whileInView={{ opacity: 0.85 }}
         viewport={{ once: true, margin: "-6%" }}
         transition={{ duration: 0.9, ease: EASE }}
         style={{
           fontFamily: "var(--font-stamp)",
           fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
+          fontWeight: 500,
+          color: "var(--color-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           margin: "0 0 clamp(1.5rem, 3.5vh, 2.25rem) 0",
@@ -210,18 +234,18 @@ export function Books() {
           transition={{ duration: 1.1, ease: EASE }}
           style={{ marginBottom: "clamp(3rem, 7vh, 5rem)" }}
         >
-          <ShelfTicker onSelectPick={setActive} />
+          <ShelfTicker onSelect={setActive} />
           <p style={{
-            fontFamily: "var(--font-stamp)", fontSize: "0.4375rem",
-            color: "var(--color-text-muted)", letterSpacing: "0.12em",
-            textTransform: "uppercase", opacity: 0.5, margin: "clamp(0.75rem,2vh,1.1rem) 0 0 0",
+            fontFamily: "var(--font-stamp)", fontSize: "0.5rem",
+            color: "var(--color-label)", letterSpacing: "0.12em",
+            textTransform: "uppercase", opacity: 0.7, margin: "clamp(0.75rem,2vh,1.1rem) 0 0 0",
           }}>
-            The current shelf · hover to stop · the marked ones are staff picks
+            The current shelf · hover to stop · the marked ones we keep talking about
           </p>
         </motion.div>
       )}
 
-      {/* Featured pick — selector + editorial pull-quote */}
+      {/* Featured — selector + editorial pull-quote */}
       <motion.div
         initial={{ opacity: 0, y: prefersReduced ? 0 : 12 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -238,34 +262,34 @@ export function Books() {
         {/* Selector */}
         <div
           role="tablist"
-          aria-label="Staff picks"
+          aria-label="Books that keep leaving the shelf"
           style={{ flex: "1 1 220px", minWidth: "min(220px, 100%)", display: "flex", flexDirection: "column" }}
         >
           <p style={{
             fontFamily: "var(--font-stamp)",
             fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-            fontWeight: 400,
-            color: "var(--color-moss-signal)",
+            fontWeight: 500,
+            color: "var(--color-label)",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
             margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0",
-            opacity: 0.6,
+            opacity: 0.8,
           }}>
-            Staff picks
+            Three that keep leaving
           </p>
 
-          {PICKS.map((p, i) => {
+          {FEATURED.map((b, i) => {
             const isActive = i === active
-            const isHover = EXPERIMENTS.hoverMotion && hoveredPick === i
+            const isHover = EXPERIMENTS.hoverMotion && hovered === i
             const lit = isActive || isHover
             return (
               <button
-                key={p.title}
+                key={b.title}
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActive(i)}
-                onMouseEnter={() => setHoveredPick(i)}
-                onMouseLeave={() => setHoveredPick(null)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
                 style={{
                   display: "flex",
                   alignItems: "stretch",
@@ -274,7 +298,7 @@ export function Books() {
                   border: "none",
                   borderTop: "1px solid rgba(175,150,115,0.22)",
                   padding: "clamp(0.85rem, 2vh, 1.15rem) 0",
-                  paddingLeft: EXPERIMENTS.hoverMotion && isHover && !isActive ? "0.4rem" : 0,
+                  paddingLeft: isHover && !isActive ? "0.4rem" : 0,
                   textAlign: "left",
                   cursor: "pointer",
                   width: "100%",
@@ -285,12 +309,12 @@ export function Books() {
                 {/* Spine edge */}
                 <motion.span
                   aria-hidden="true"
-                  animate={{ opacity: lit ? 1 : 0.25, scaleY: isActive ? 1 : lit ? 0.85 : 0.7 }}
+                  animate={{ opacity: lit ? 1 : 0.3, scaleY: isActive ? 1 : lit ? 0.85 : 0.7 }}
                   transition={{ duration: 0.3, ease: EASE }}
                   style={{
                     width: "3px",
                     flexShrink: 0,
-                    backgroundColor: p.color,
+                    backgroundColor: b.color,
                     borderRadius: "2px",
                     transformOrigin: "center",
                   }}
@@ -302,24 +326,22 @@ export function Books() {
                     fontSize: "clamp(1.125rem, 1.7vw, 1.4rem)",
                     fontWeight: 400,
                     fontStyle: "italic",
-                    color: lit ? "var(--color-ink)" : "var(--color-text-muted)",
+                    color: lit ? "var(--color-ink)" : "var(--color-text-secondary)",
                     lineHeight: 1.2,
                     transition: "color 260ms ease",
                   }}>
-                    {p.picker}
+                    {b.title}
                   </span>
                   <span style={{
                     display: "block",
                     fontFamily: "var(--font-dm-sans)",
                     fontSize: "clamp(0.75rem, 0.85vw, 0.8125rem)",
-                    fontWeight: 300,
+                    fontWeight: 400,
                     color: "var(--color-text-muted)",
                     lineHeight: 1.4,
-                    marginTop: "0.15em",
-                    opacity: lit ? 0.9 : 0.6,
-                    transition: "opacity 260ms ease",
+                    marginTop: "0.2em",
                   }}>
-                    {p.title}
+                    {b.author}
                   </span>
                 </span>
               </button>
@@ -341,18 +363,19 @@ export function Books() {
               exit={{ opacity: 0, y: prefersReduced ? 0 : -8 }}
               transition={{ duration: 0.4, ease: EASE }}
             >
-              <p style={{
-                fontFamily: "var(--font-stamp)",
-                fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-                fontWeight: 400,
-                color: pick.color,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                margin: "0 0 clamp(1rem, 2.5vh, 1.5rem) 0",
-                opacity: 0.85,
-              }}>
-                {pick.picker} keeps re-shelving this one
-              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6em", margin: "0 0 clamp(1rem, 2.5vh, 1.5rem) 0" }}>
+                <span aria-hidden="true" style={{ width: "1.5rem", height: "2px", backgroundColor: book.color, borderRadius: "2px" }} />
+                <span style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+                  fontWeight: 500,
+                  color: "var(--color-label)",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}>
+                  Keeps leaving the shelf
+                </span>
+              </div>
 
               <blockquote style={{
                 fontFamily: "var(--font-cormorant)",
@@ -366,7 +389,7 @@ export function Books() {
                 maxWidth: "30ch",
                 textWrap: "balance",
               } as React.CSSProperties}>
-                {pick.note}
+                {book.note}
               </blockquote>
 
               <div style={{
@@ -389,33 +412,33 @@ export function Books() {
                   lineHeight: 1.3,
                   margin: 0,
                 }}>
-                  {pick.title}
+                  {book.title}
                   <span style={{
                     fontFamily: "var(--font-dm-sans)",
                     fontStyle: "normal",
-                    fontWeight: 300,
+                    fontWeight: 400,
                     fontSize: "0.8125rem",
                     color: "var(--color-text-muted)",
                     marginLeft: "0.6em",
                   }}>
-                    {pick.author}
+                    {book.author}
                   </span>
                 </p>
 
                 <span style={{
                   fontFamily: "var(--font-stamp)",
-                  fontSize: "0.4375rem",
-                  color: "var(--color-moss-signal)",
+                  fontSize: "0.5rem",
+                  color: "var(--color-label)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  border: "0.75px solid rgba(61,97,71,0.3)",
+                  border: "1px solid rgba(90,58,34,0.35)",
                   borderRadius: 0,
                   padding: "0.32em 0.6em",
                   transform: "rotate(-1.5deg)",
                   whiteSpace: "nowrap",
                   flexShrink: 0,
                 }}>
-                  Borrowed {pick.borrowed} times
+                  Borrowed {book.borrowed} times
                 </span>
               </div>
             </motion.div>
@@ -437,8 +460,8 @@ export function Books() {
           }}>
             <h3 style={{
               fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-              fontWeight: 400, color: "var(--color-moss-signal)", letterSpacing: "0.15em",
-              textTransform: "uppercase", margin: 0, opacity: 0.58,
+              fontWeight: 500, color: "var(--color-label)", letterSpacing: "0.15em",
+              textTransform: "uppercase", margin: 0, opacity: 0.8,
             }}>
               Also on the shelves
             </h3>
@@ -446,7 +469,7 @@ export function Books() {
               <span aria-hidden="true" style={{
                 fontFamily: "var(--font-stamp)", fontSize: "0.4375rem",
                 color: "var(--color-text-muted)", letterSpacing: "0.12em",
-                textTransform: "uppercase", opacity: 0.5, whiteSpace: "nowrap",
+                textTransform: "uppercase", opacity: 0.7, whiteSpace: "nowrap",
               }}>
                 Scan →
               </span>
@@ -494,7 +517,7 @@ export function Books() {
                   </span>
                   <span style={{
                     fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
-                    fontWeight: 300, color: "var(--color-text-muted)",
+                    fontWeight: 400, color: "var(--color-text-muted)",
                   }}>
                     {b.author}
                   </span>
@@ -528,7 +551,7 @@ export function Books() {
                   </span>
                   <span style={{
                     fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
-                    fontWeight: 300, color: "var(--color-text-muted)",
+                    fontWeight: 400, color: "var(--color-text-muted)",
                     whiteSpace: "nowrap", flexShrink: 0,
                   }}>
                     {b.author}
@@ -551,7 +574,7 @@ export function Books() {
       >
         <p style={{
           fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.8125rem, 1vw, 0.9375rem)",
-          fontWeight: 300, color: "var(--color-text-secondary)", letterSpacing: "0.03em", margin: 0,
+          fontWeight: 400, color: "var(--color-text-secondary)", letterSpacing: "0.03em", margin: 0,
         }}>
           The shelves change often. That&apos;s part of the point.
         </p>

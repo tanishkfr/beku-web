@@ -137,12 +137,14 @@ function OriginalMark() {
 function MenuRow({
   item,
   index,
+  isFirst,
   isOpen,
   onToggle,
   prefersReduced,
 }: {
   item: MenuItem
   index: number
+  isFirst: boolean
   isOpen: boolean
   onToggle: () => void
   prefersReduced: boolean | null
@@ -187,7 +189,7 @@ function MenuRow({
           width: "100%",
           background: "none",
           border: "none",
-          borderTop: "1px solid rgba(175,150,115,0.20)",
+          borderTop: isFirst ? "none" : "1px solid rgba(175,150,115,0.20)",
           cursor: "pointer",
           textAlign: "left",
           padding: "clamp(0.875rem,1.8vh,1.1rem) 0 clamp(0.875rem,1.8vh,1.1rem) 0.875rem",
@@ -223,6 +225,8 @@ function MenuRow({
             alignItems: "center",
             flexWrap: "wrap",
             gap: "0.1em",
+            transform: EXPERIMENTS.hoverMotion && hovered && !isOpen ? "translateX(4px)" : "translateX(0)",
+            transition: "transform 260ms var(--ease-natural)",
           }}>
             <span style={{
               fontFamily: "var(--font-cormorant)",
@@ -340,25 +344,45 @@ function MenuColumn({
 }) {
   return (
     <div style={{ flex: "1 1 280px", minWidth: 0 }}>
-      {/* Column label */}
-      <motion.h3
+      {/* Column header */}
+      <motion.div
         initial={{ opacity: 0, y: prefersReduced ? 0 : 6 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-6%" }}
         transition={{ duration: 0.7, delay: entryDelay, ease: EASE }}
         style={{
-          fontFamily: "var(--font-stamp)",
-          fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
-          letterSpacing: "0.15em",
-          textTransform: "uppercase",
-          margin: "0 0 clamp(0.75rem,1.8vh,1rem) 0",
-          opacity: 0.7,
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: "1rem",
+          borderBottom: "1px solid rgba(175,150,115,0.3)",
+          paddingBottom: "clamp(0.5rem,1.2vh,0.7rem)",
+          margin: "0 0 clamp(0.6rem,1.4vh,0.85rem) 0",
         }}
       >
-        {label}
-      </motion.h3>
+        <h3 style={{
+          fontFamily: "var(--font-stamp)",
+          fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+          fontWeight: 500,
+          color: "var(--color-label)",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+          margin: 0,
+          opacity: 0.9,
+        }}>
+          {label}
+        </h3>
+        <span style={{
+          fontFamily: "var(--font-stamp)",
+          fontSize: "0.4375rem",
+          fontWeight: 400,
+          color: "var(--color-text-muted)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+        }}>
+          {items.length} to choose
+        </span>
+      </motion.div>
 
       {/* Item list */}
       <ul aria-label={label} style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -375,6 +399,7 @@ function MenuColumn({
               <MenuRow
                 item={item}
                 index={i}
+                isFirst={i === 0}
                 isOpen={openKey === k}
                 onToggle={() => setOpenKey(openKey === k ? null : k)}
                 prefersReduced={prefersReduced}

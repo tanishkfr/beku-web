@@ -56,8 +56,8 @@ export function Reviews() {
         style={{
           fontFamily: "var(--font-stamp)",
           fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
+          fontWeight: 500,
+          color: "var(--color-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           margin: "0 0 clamp(3rem, 8vh, 6rem) 0",
@@ -102,13 +102,13 @@ export function Reviews() {
             </motion.blockquote>
 
             <motion.p
-              animate={isInView ? { opacity: 0.55 } : { opacity: 0 }}
+              animate={isInView ? { opacity: 0.85 } : { opacity: 0 }}
               transition={{ duration: 0.5, delay: prefersReduced ? 0 : i * 0.13 + 0.18, ease: EASE }}
               style={{
                 fontFamily: "var(--font-stamp)",
                 fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-                fontWeight: 400,
-                color: "var(--color-warmwood)",
+                fontWeight: 500,
+                color: "var(--color-label)",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 margin: 0,

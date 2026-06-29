@@ -36,13 +36,13 @@ export function Events() {
         style={{
           fontFamily: "var(--font-stamp)",
           fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
+          fontWeight: 500,
+          color: "var(--color-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           margin: "0 0 clamp(1.5rem, 3.5vh, 2.25rem) 0",
           paddingLeft: IMG_PAD,
-          opacity: 0.65,
+          opacity: 0.85,
         }}
       >
         Happening here
