@@ -5,6 +5,7 @@ import Image from "next/image"
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
 import { OpenStatus } from "@/components/OpenStatus"
+import { GrainOverlay } from "@/components/GrainOverlay"
 import { EASE, H_PAD, CREAM, CREAM_DIM, CREAM_MUTED } from "@/lib/tokens"
 import { hours, rating, links } from "@/lib/business"
 
@@ -120,7 +121,7 @@ export function Arrival() {
             top: "clamp(5.5rem, 11vh, 7.5rem)",
             left: H_PAD,
             fontFamily: "var(--font-stamp)",
-            fontSize: "clamp(0.5rem, 0.62vw, 0.5625rem)",
+            fontSize: "clamp(0.625rem, 0.62vw, 0.6875rem)",
             fontWeight: 400,
             color: CREAM_MUTED,
             letterSpacing: "0.14em",
@@ -161,7 +162,7 @@ export function Arrival() {
             aria-hidden="true"
             style={{
               fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.62vw, 0.5625rem)",
+              fontSize: "clamp(0.625rem, 0.62vw, 0.6875rem)",
               fontWeight: 400,
               color: "rgba(246, 240, 228, 0.78)",
               letterSpacing: "0.12em",
@@ -234,7 +235,7 @@ export function Arrival() {
                 fallback={hours.fullLabel}
                 style={{
                   fontFamily: "var(--font-stamp)",
-                  fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
+                  fontSize: "clamp(0.625rem, 0.58vw, 0.6875rem)",
                   fontWeight: 400,
                   color: CREAM_MUTED,
                   letterSpacing: "0.12em",
@@ -323,13 +324,7 @@ export function Arrival() {
             sizes="(max-width: 768px) 100vw, 100vw"
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
-          <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
-            <filter id="arrival-interior-grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#arrival-interior-grain)" />
-          </svg>
+          <GrainOverlay />
         </div>
       </motion.div>
 

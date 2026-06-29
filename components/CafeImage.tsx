@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { CSSProperties } from "react"
+import { GrainOverlay } from "@/components/GrainOverlay"
 
 // Curated Unsplash photos — swap with actual Beku photography when available.
 // All images: https://unsplash.com/license (free to use)
@@ -60,25 +61,7 @@ export function CafeImage({
         priority={priority}
         style={{ objectFit: "cover", objectPosition: "center" }}
       />
-      {/* Subtle grain — matches the page-level grain for visual consistency */}
-      <svg
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.055,
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      >
-        <filter id="cafe-img-grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#cafe-img-grain)" />
-      </svg>
+      <GrainOverlay opacity={0.055} style={{ zIndex: 1 }} />
     </div>
   )
 }

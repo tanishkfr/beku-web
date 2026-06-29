@@ -4,6 +4,7 @@ import Image from "next/image"
 import { motion, useReducedMotion } from "framer-motion"
 import { EASE, IMG_PAD, H_PAD } from "@/lib/tokens"
 import { links } from "@/lib/business"
+import { GrainOverlay } from "@/components/GrainOverlay"
 
 const FOOTER_IMAGES = [
   {
@@ -48,14 +49,6 @@ export function SiteFooter() {
           gap: "clamp(4px, 0.6vw, 8px)",
         }}
       >
-        <svg aria-hidden="true" style={{ display: "none" }}>
-          <defs>
-            <filter id="footer-grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-          </defs>
-        </svg>
         {FOOTER_IMAGES.map((img, i) => (
           <div
             key={i}
@@ -73,9 +66,7 @@ export function SiteFooter() {
               sizes="(max-width: 768px) 33vw, 33vw"
               style={{ objectFit: "cover", objectPosition: img.position }}
             />
-            <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
-              <rect width="100%" height="100%" filter="url(#footer-grain)" />
-            </svg>
+            <GrainOverlay />
           </div>
         ))}
       </motion.div>

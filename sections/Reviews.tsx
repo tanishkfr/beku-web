@@ -55,7 +55,7 @@ export function Reviews() {
         transition={{ duration: 0.8, ease: EASE }}
         style={{
           fontFamily: "var(--font-stamp)",
-          fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
+          fontSize: "clamp(0.625rem, 0.58vw, 0.6875rem)",
           fontWeight: 500,
           color: "var(--color-label)",
           letterSpacing: "0.14em",
@@ -106,7 +106,7 @@ export function Reviews() {
               transition={{ duration: 0.5, delay: prefersReduced ? 0 : i * 0.13 + 0.18, ease: EASE }}
               style={{
                 fontFamily: "var(--font-stamp)",
-                fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
                 fontWeight: 500,
                 color: "var(--color-label)",
                 letterSpacing: "0.12em",

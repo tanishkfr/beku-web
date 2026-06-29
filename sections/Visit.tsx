@@ -134,11 +134,11 @@ export function Visit() {
         Café · Bakery · Bookstore
       </motion.p>
 
-      {/* Two-column: info left, map right */}
+      {/* Two-column: info left, map right — stacks to single column below ~680px */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "clamp(3rem, 6vw, 5rem)",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
+        gap: "clamp(2rem, 6vw, 5rem)",
         alignItems: "start",
       }}>
         {/* Left — WHERE / WHEN + quote */}
@@ -165,7 +165,7 @@ export function Visit() {
               <div>
                 <p style={{
                   fontFamily: "var(--font-stamp)",
-                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
                   fontWeight: 500,
                   color: "var(--color-label)",
                   letterSpacing: "0.14em",
@@ -247,7 +247,7 @@ export function Visit() {
               <div>
                 <p style={{
                   fontFamily: "var(--font-stamp)",
-                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
                   fontWeight: 500,
                   color: "var(--color-label)",
                   letterSpacing: "0.14em",
@@ -273,7 +273,7 @@ export function Visit() {
                     fallback=""
                     style={{
                       fontFamily: "var(--font-stamp)",
-                      fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                      fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
                       fontWeight: 400,
                       color: "var(--color-text-muted)",
                       letterSpacing: "0.1em",
@@ -303,7 +303,7 @@ export function Visit() {
           </DwellNote>
         </div>
 
-        {/* Right — Google Maps embed */}
+        {/* Right — OpenStreetMap embed */}
         <motion.div
           {...itemReveal(0.22)}
           style={{
@@ -322,7 +322,7 @@ export function Visit() {
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="Beku on Google Maps"
+            title="Beku on OpenStreetMap"
           />
         </motion.div>
       </div>

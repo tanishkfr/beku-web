@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { SplashScreen } from "@/components/SplashScreen";
+import { GrainOverlay } from "@/components/GrainOverlay";
 import { TimeOfDayController } from "@/components/TimeOfDayController";
 import { SITE_URL, business, address, contact, hours, rating, links } from "@/lib/business";
 
@@ -117,29 +118,7 @@ export default function RootLayout({
         <SplashScreen />
         {children}
         {/* Global paper grain — gives the page material weight */}
-        <svg
-          aria-hidden="true"
-          style={{
-            position: "fixed",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            opacity: 0.07,
-            pointerEvents: "none",
-            zIndex: 200,
-          }}
-        >
-          <filter id="beku-page-grain">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.65"
-              numOctaves="4"
-              stitchTiles="stitch"
-            />
-            <feColorMatrix type="saturate" values="0" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#beku-page-grain)" />
-        </svg>
+        <GrainOverlay opacity={0.07} style={{ position: "fixed", zIndex: 200 }} />
       </body>
     </html>
   );

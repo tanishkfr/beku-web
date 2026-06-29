@@ -6,6 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
 import { DwellNote } from "@/components/DwellNote"
+import { GrainOverlay } from "@/components/GrainOverlay"
 import { links } from "@/lib/business"
 
 const ZOMATO_URL = links.zomato
@@ -363,7 +364,7 @@ function MenuColumn({
       >
         <h3 style={{
           fontFamily: "var(--font-stamp)",
-          fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+          fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
           fontWeight: 500,
           color: "var(--color-label)",
           letterSpacing: "0.15em",
@@ -495,13 +496,7 @@ export function Food() {
             sizes="(max-width: 768px) 100vw, 100vw"
             style={{ objectFit: "cover", objectPosition: "center 60%" }}
           />
-          <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
-            <filter id="food-grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#food-grain)" />
-          </svg>
+          <GrainOverlay />
         </div>
 
         {/* Artifact: bakery label, pinned to the photo's corner */}

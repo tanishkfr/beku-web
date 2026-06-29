@@ -1,4 +1,5 @@
 import { CSSProperties } from "react"
+import { GrainOverlay } from "@/components/GrainOverlay"
 
 // "gate"     — the first glimpse after stepping through. Deep forest shade, one off-axis
 //              warm light source. Immersive. Used in Arrival.
@@ -116,29 +117,7 @@ export function ImagePlaceholder({
         ...style,
       }}
     >
-      {/* Film grain — suggests organic texture, not a design surface */}
-      <svg
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.072,
-          pointerEvents: "none",
-        }}
-      >
-        <filter id="beku-grain">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.72"
-            numOctaves="4"
-            stitchTiles="stitch"
-          />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#beku-grain)" />
-      </svg>
+      <GrainOverlay opacity={0.072} />
     </div>
   )
 }

@@ -522,7 +522,7 @@ export function Books() {
       >
         <h2 style={{
           fontFamily: "var(--font-stamp)",
-          fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
+          fontSize: "clamp(0.625rem, 0.58vw, 0.6875rem)",
           fontWeight: 500,
           color: "var(--color-label)",
           letterSpacing: "0.14em",
@@ -612,7 +612,7 @@ export function Books() {
               >
                 <p style={{
                   fontFamily: "var(--font-stamp)",
-                  fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+                  fontSize: "clamp(0.625rem, 0.55vw, 0.6875rem)",
                   fontWeight: 500,
                   color: "var(--color-label)",
                   letterSpacing: "0.15em",
@@ -712,7 +712,7 @@ export function Books() {
                       <span aria-hidden="true" style={{ width: "1.5rem", height: "2px", backgroundColor: book.color, borderRadius: "2px" }} />
                       <span style={{
                         fontFamily: "var(--font-stamp)",
-                        fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+                        fontSize: "clamp(0.625rem, 0.55vw, 0.6875rem)",
                         fontWeight: 500,
                         color: "var(--color-label)",
                         letterSpacing: "0.14em",

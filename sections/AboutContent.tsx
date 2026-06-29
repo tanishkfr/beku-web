@@ -30,7 +30,7 @@ export function AboutContent() {
           {...reveal(0)}
           style={{
             fontFamily: "var(--font-stamp)",
-            fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+            fontSize: "clamp(0.625rem, 0.6vw, 0.6875rem)",
             fontWeight: 400,
             color: CREAM_MUTED,
             letterSpacing: "0.14em",

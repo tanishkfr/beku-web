@@ -5,6 +5,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { useRef } from "react"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 import { DwellNote } from "@/components/DwellNote"
+import { GrainOverlay } from "@/components/GrainOverlay"
 
 const GARDEN_SRC = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=2070&q=82"
 
@@ -67,13 +68,7 @@ export function Space() {
               style={{ objectFit: "cover", objectPosition: "center 55%" }}
             />
           </motion.div>
-          <svg aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.038, pointerEvents: "none" }}>
-            <filter id="space-grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#space-grain)" />
-          </svg>
+          <GrainOverlay />
         </div>
       </motion.div>
 
