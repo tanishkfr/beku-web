@@ -80,7 +80,7 @@ export default function Image() {
                 letterSpacing: "2px",
               }}
             >
-              ★ {rating.value} on Google
+              {`★ ${rating.value} on Google`}
             </div>
           </div>
         </div>
