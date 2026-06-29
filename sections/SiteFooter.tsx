@@ -1,12 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { EASE, IMG_PAD, H_PAD } from "@/lib/tokens"
-import { EXPERIMENTS } from "@/lib/experiments"
 import { links } from "@/lib/business"
-import { buildMusic, buildRoomTone } from "@/lib/audio"
 
 const FOOTER_IMAGES = [
   {
@@ -32,60 +29,6 @@ const FOOTER_IMAGES = [
 
 export function SiteFooter() {
   const prefersReduced = useReducedMotion()
-  const [playing, setPlaying] = useState(false)
-  const audioCtxRef = useRef<AudioContext | null>(null)
-  const sourcesRef = useRef<AudioScheduledSourceNode[]>([])
-  const masterGainRef = useRef<GainNode | null>(null)
-  const scheduleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (scheduleRef.current) clearTimeout(scheduleRef.current)
-      audioCtxRef.current?.close()
-    }
-  }, [])
-
-  const toggleSound = () => {
-    if (playing) {
-      if (scheduleRef.current) { clearTimeout(scheduleRef.current); scheduleRef.current = null }
-      if (masterGainRef.current && audioCtxRef.current) {
-        masterGainRef.current.gain.linearRampToValueAtTime(0, audioCtxRef.current.currentTime + 0.8)
-        setTimeout(() => {
-          sourcesRef.current.forEach(s => { try { s.stop() } catch { /* already stopped */ } })
-          sourcesRef.current = []
-          audioCtxRef.current?.close()
-          audioCtxRef.current = null
-        }, 900)
-      }
-      setPlaying(false)
-    } else {
-      try {
-        const ctx = new AudioContext()
-        audioCtxRef.current = ctx
-        sourcesRef.current = []
-
-        const master = ctx.createGain()
-        master.gain.setValueAtTime(0, ctx.currentTime)
-        master.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5)
-        master.connect(ctx.destination)
-        masterGainRef.current = master
-
-        if (EXPERIMENTS.generativeMusic) {
-          buildMusic(ctx, master, sourcesRef.current, scheduleRef)
-        } else {
-          buildRoomTone(ctx, master, sourcesRef.current)
-        }
-
-        setPlaying(true)
-      } catch {
-        // AudioContext unavailable
-      }
-    }
-  }
-
-  const soundNoun = EXPERIMENTS.generativeMusic ? "music" : "ambient café sound"
-  const idleLabel = EXPERIMENTS.generativeMusic ? "Music" : "Ambience"
-  const liveLabel = EXPERIMENTS.generativeMusic ? "Playing" : "Listening"
 
   const CREAM = "#F6F0E4"
 
@@ -183,43 +126,6 @@ export function SiteFooter() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.6rem" }}>
-          {!prefersReduced && (
-            <button
-              onClick={toggleSound}
-              aria-label={playing ? `Stop ${soundNoun}` : `Play ${soundNoun}`}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.45em",
-                fontFamily: "var(--font-stamp)",
-                fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-                fontWeight: 400,
-                color: playing ? "rgba(246, 240, 228, 0.52)" : "rgba(246, 240, 228, 0.24)",
-                letterSpacing: "0.13em",
-                textTransform: "uppercase",
-                transition: "color 400ms ease",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(246, 240, 228, 0.65)" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = playing ? "rgba(246, 240, 228, 0.52)" : "rgba(246, 240, 228, 0.24)" }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={playing ? "live" : "idle"}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15, ease: EASE }}
-                  style={{ pointerEvents: "none" }}
-                >
-                  {playing ? liveLabel : idleLabel}
-                </motion.span>
-              </AnimatePresence>
-            </button>
-          )}
           <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
             <p style={{
               fontFamily: "var(--font-dm-sans)",

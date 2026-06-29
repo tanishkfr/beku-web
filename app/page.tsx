@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar"
 import { RoomRail } from "@/components/RoomRail"
+import { AmbienceFab } from "@/components/AmbienceFab"
 import { PageTransition } from "@/components/PageTransition"
 import { ArrivalProvider } from "@/contexts/ArrivalContext"
 import { Arrival } from "@/sections/Arrival"
@@ -18,6 +19,7 @@ export default function Home() {
     <ArrivalProvider>
       <Navbar />
       <RoomRail />
+      <AmbienceFab />
       <PageTransition>
         <main id="main-content">
           <Arrival />

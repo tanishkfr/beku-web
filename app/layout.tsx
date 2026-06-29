@@ -3,7 +3,6 @@ import { Cormorant_Garamond, Plus_Jakarta_Sans, DM_Mono } from "next/font/google
 import "./globals.css";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TimeOfDayController } from "@/components/TimeOfDayController";
-import { CustomCursor } from "@/components/CustomCursor";
 import { SITE_URL, business, address, contact, hours, rating, links } from "@/lib/business";
 
 const cormorant = Cormorant_Garamond({
@@ -115,7 +114,6 @@ export default function RootLayout({
       <body>
         <a href="#main-content" className="sr-skip-link">Skip to content</a>
         <TimeOfDayController />
-        <CustomCursor />
         <SplashScreen />
         {children}
         {/* Global paper grain — gives the page material weight */}

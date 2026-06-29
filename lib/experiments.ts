@@ -26,8 +26,6 @@ export const EXPERIMENTS = {
   hoverMotion: true,
   /** Books relaid out around a slow drifting shelf "ticker" (vs the list). */
   booksTicker: true,
-  /** On-brand custom cursor (fine-pointer, non-reduced-motion only). */
-  customCursor: true,
 } as const
 
 export type ExperimentKey = keyof typeof EXPERIMENTS

@@ -17,8 +17,8 @@ export function makeImpulse(ctx: AudioContext, seconds: number, decay: number) {
   return buf
 }
 
-// D major pentatonic, lower-mid register — fewer high notes, calmer.
-const PENTATONIC = [220.0, 246.94, 293.66, 329.63, 369.99, 440.0]
+// D major pentatonic, low register (D3–D4) — warm, few high notes, meditative.
+const PENTATONIC = [146.83, 164.81, 185.0, 220.0, 246.94, 293.66]
 
 /** Original ambient café room-tone (fallback when generativeMusic is off). */
 export function buildRoomTone(
@@ -67,8 +67,10 @@ export function buildRoomTone(
 }
 
 /**
- * Generative calming music — slow open pad + sparse pentatonic bells + reverb.
- * Schedules recurring notes via the caller's scheduleRef so they can be cleared.
+ * Generative meditative music — a deep sustained drone under a slow breathing
+ * pad, with rare, soft pentatonic bells that swell and decay into a long
+ * reverb. Closer to stillness than melody. Schedules recurring notes via the
+ * caller's scheduleRef so they can be cleared.
  */
 export function buildMusic(
   ctx: AudioContext,
@@ -76,33 +78,51 @@ export function buildMusic(
   sources: AudioScheduledSourceNode[],
   scheduleRef: { current: ReturnType<typeof setTimeout> | null },
 ) {
-  // Warm bus: everything passes through a gentle lowpass so nothing is harsh.
+  // Warm bus: a soft lowpass so nothing is ever bright or harsh.
   const bus = ctx.createGain()
   const busLp = ctx.createBiquadFilter()
-  busLp.type = "lowpass"; busLp.frequency.value = 3000
+  busLp.type = "lowpass"; busLp.frequency.value = 2200
   bus.connect(busLp); busLp.connect(master)
 
-  // Reverb for space
+  // Long, deep reverb — a still, spacious room.
   const reverb = ctx.createConvolver()
-  reverb.buffer = makeImpulse(ctx, 4.0, 2.6)
-  const reverbGain = ctx.createGain(); reverbGain.gain.value = 0.8
+  reverb.buffer = makeImpulse(ctx, 6.5, 3.2)
+  const reverbGain = ctx.createGain(); reverbGain.gain.value = 0.9
   reverb.connect(reverbGain); reverbGain.connect(bus)
 
-  // Pad: an open D–A–E chord, two detuned voices each, through a warm lowpass
-  // with a very slow LFO on the cutoff so the chord breathes.
+  // Sustained low drone — root + fifth (D2/A2), gently detuned for shimmer,
+  // with a slow tremolo so it never sits perfectly still.
+  const droneGain = ctx.createGain(); droneGain.gain.value = 0.032
+  droneGain.connect(bus); droneGain.connect(reverb)
+  const droneTrem = ctx.createOscillator(); droneTrem.frequency.value = 0.07
+  const droneTremGain = ctx.createGain(); droneTremGain.gain.value = 0.012
+  droneTrem.connect(droneTremGain); droneTremGain.connect(droneGain.gain); droneTrem.start()
+  sources.push(droneTrem)
+  ;[73.42, 110.0].forEach((f) => {        // D2, A2
+    [-3, 3].forEach((detune) => {
+      const o = ctx.createOscillator()
+      o.type = "sine"
+      o.frequency.value = f
+      o.detune.value = detune
+      o.connect(droneGain); o.start(); sources.push(o)
+    })
+  })
+
+  // Breathing pad: an open D–A–E chord, two detuned triangle voices each,
+  // through a warm lowpass with a very slow LFO (~50s) so the chord breathes.
   const padFilter = ctx.createBiquadFilter()
-  padFilter.type = "lowpass"; padFilter.frequency.value = 500
-  const padGain = ctx.createGain(); padGain.gain.value = 0.05
+  padFilter.type = "lowpass"; padFilter.frequency.value = 420
+  const padGain = ctx.createGain(); padGain.gain.value = 0.03
   padFilter.connect(padGain); padGain.connect(bus); padGain.connect(reverb)
 
-  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.03
-  const lfoGain = ctx.createGain(); lfoGain.gain.value = 150
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.02
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 120
   lfo.connect(lfoGain); lfoGain.connect(padFilter.frequency); lfo.start()
   sources.push(lfo)
 
   const padNotes = [146.83, 220.0, 329.63] // D3, A3, E4
   padNotes.forEach((f) => {
-    [-4, 4].forEach((detune) => {
+    [-5, 5].forEach((detune) => {
       const o = ctx.createOscillator()
       o.type = "triangle"
       o.frequency.value = f
@@ -113,8 +133,8 @@ export function buildMusic(
     })
   })
 
-  // Sparse bells: one soft sine note from the pentatonic, at slow random gaps.
-  // Softer, longer, and further apart than before — closer to silence.
+  // Rare bells: one soft sine note from the low pentatonic, a slow swell and a
+  // very long tail, spaced far apart — closer to silence than to melody.
   const playNote = () => {
     const now = ctx.currentTime
     const f = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)]
@@ -123,12 +143,12 @@ export function buildMusic(
     o.frequency.value = f
     const g = ctx.createGain()
     g.gain.setValueAtTime(0, now)
-    g.gain.linearRampToValueAtTime(0.045, now + 0.8)           // gentle attack
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 5.0)     // long release
+    g.gain.linearRampToValueAtTime(0.038, now + 1.4)           // slow swell
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 8.0)     // very long tail
     o.connect(g); g.connect(bus); g.connect(reverb)
-    o.start(now); o.stop(now + 5.2)
+    o.start(now); o.stop(now + 8.4)
     sources.push(o)
-    scheduleRef.current = setTimeout(playNote, 4000 + Math.random() * 5000)
+    scheduleRef.current = setTimeout(playNote, 6500 + Math.random() * 7000)
   }
-  scheduleRef.current = setTimeout(playNote, 1600)
+  scheduleRef.current = setTimeout(playNote, 2500)
 }

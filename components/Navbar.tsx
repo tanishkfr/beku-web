@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
 import { EXPERIMENTS } from "@/lib/experiments"
 import { EASE, CREAM, H_PAD } from "@/lib/tokens"
@@ -25,41 +25,8 @@ export function Navbar() {
   const { heroBekuVisible } = useArrivalContext()
   const prefersReduced = useReducedMotion()
 
-  const [inArrival, setInArrival]     = useState(true)
-  const [inDarkAbout, setInDarkAbout] = useState(false)
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
-
-  const { scrollY } = useScroll()
-  // Unused — kept in case future scroll-shadow is added
-  const [_scrolled, setScrolled] = useState(false)
-  useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 60))
-
-  useEffect(() => {
-    const arrival = document.querySelector('[aria-label="Arrival"]')
-    if (!arrival) { setInArrival(false); return }
-    const obs = new IntersectionObserver(
-      ([entry]) => setInArrival(entry.isIntersecting),
-      { threshold: 0 }
-    )
-    obs.observe(arrival)
-    return () => obs.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const darkEls = document.querySelectorAll("[data-navbar-dark]")
-    if (!darkEls.length) return
-    const states = new Map<Element, boolean>()
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => states.set(e.target, e.isIntersecting))
-        setInDarkAbout([...states.values()].some(Boolean))
-      },
-      { threshold: 0 }
-    )
-    darkEls.forEach((el) => { states.set(el, false); obs.observe(el) })
-    return () => obs.disconnect()
-  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileOpen(false) }
@@ -72,22 +39,19 @@ export function Navbar() {
     return () => { document.body.style.overflow = "" }
   }, [mobileOpen])
 
-  const isDark = inArrival || inDarkAbout
-
   // ── Navbar shell ──────────────────────────────────────────────────────────
-  // Dark sections: subtle dark glass so cream text always reads against the image.
-  // Light sections: familiar frosted cream.
-  const navBg     = isDark ? "rgba(18, 30, 22, 0.38)" : "rgba(246, 240, 228, 0.94)"
+  // One consistent translucent dark glass — the same surface the navbar wears
+  // over the hero — held at every scroll position. It never swaps to a light
+  // fill; the frosted dark tint + blur keep the cream wordmark and links legible
+  // over both the dark rooms and the lighter sections below.
+  const navBg     = "rgba(18, 30, 22, 0.38)"
   const navBlur   = "blur(16px)"
-  const navBorder = isDark
-    ? "1px solid rgba(246, 240, 228, 0.08)"
-    : "1px solid rgba(216, 208, 188, 0.45)"
+  const navBorder = "1px solid rgba(246, 240, 228, 0.08)"
 
   // ── Link colours ──────────────────────────────────────────────────────────
-  // One base colour per mode; hover = full opacity of same colour.
-  const linkBase  = isDark ? "rgba(246, 240, 228, 0.82)" : "rgba(24, 40, 32, 0.68)"
-  const linkHover = isDark ? "rgba(246, 240, 228, 1.0)"  : "rgba(24, 40, 32, 1.0)"
-  const lineColor = (mobileOpen || isDark) ? CREAM : "var(--color-ink)"
+  const linkBase  = "rgba(246, 240, 228, 0.82)"
+  const linkHover = "rgba(246, 240, 228, 1.0)"
+  const lineColor = CREAM
 
   return (
     <>
@@ -130,7 +94,7 @@ export function Navbar() {
                     fontFamily: "var(--font-cormorant)",
                     fontSize: "1.3125rem",
                     fontWeight: 400,
-                    color: (mobileOpen || isDark) ? CREAM : "var(--color-forest)",
+                    color: CREAM,
                     letterSpacing: "0.03em",
                     textDecoration: "none",
                     transition: "color 350ms ease",
@@ -183,9 +147,7 @@ export function Navbar() {
                     position: "absolute",
                     bottom: 0, left: 0, right: 0,
                     height: "0.75px",
-                    backgroundColor: isDark
-                      ? "rgba(246, 240, 228, 0.45)"
-                      : "rgba(24, 40, 32, 0.35)",
+                    backgroundColor: "rgba(246, 240, 228, 0.45)",
                     transformOrigin: "left center",
                     display: "block",
                   }}
