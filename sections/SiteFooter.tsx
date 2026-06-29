@@ -5,6 +5,7 @@ import Image from "next/image"
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { EASE, IMG_PAD, H_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
+import { links } from "@/lib/business"
 
 // ── Audio engines ───────────────────────────────────────────────────────────
 
@@ -356,8 +357,8 @@ export function SiteFooter() {
             </p>
             <div aria-hidden="true" style={{ width: "1px", height: "0.75em", backgroundColor: "rgba(246, 240, 228, 0.12)" }} />
             {[
-              { label: "Instagram", href: "https://instagram.com/beku.blr" },
-              { label: "Zomato", href: "https://www.zomato.com/bangalore/beku-cafe-bakery-bookstore-1-jp-nagar-bangalore" },
+              { label: "Instagram", href: links.instagram },
+              { label: "Zomato", href: links.zomato },
             ].map(({ label, href }) => (
               <a
                 key={label}

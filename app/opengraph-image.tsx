@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { rating } from "@/lib/business"
 
 export const runtime = "edge"
 export const alt = "Beku — Café, Bakery & Bookstore in JP Nagar, Bangalore"
@@ -79,7 +80,7 @@ export default function Image() {
                 letterSpacing: "2px",
               }}
             >
-              ★ 4.7 on Google
+              ★ {rating.value} on Google
             </div>
           </div>
         </div>

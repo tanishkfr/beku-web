@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
 import { EXPERIMENTS } from "@/lib/experiments"
 import { DwellNote } from "@/components/DwellNote"
+import { events, links } from "@/lib/business"
 
 const EVENTS_SRC = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2070&q=82"
 
@@ -107,7 +108,7 @@ export function Events() {
               margin: "0 0 0.4em 0",
               opacity: 0.7,
             }}>
-              Pinned this week
+              {events.featured.pinnedLabel}
             </p>
             <p style={{
               fontFamily: "var(--font-cormorant)",
@@ -118,7 +119,7 @@ export function Events() {
               lineHeight: 1.05,
               margin: "0 0 0.25em 0",
             }}>
-              Film Night
+              {events.featured.title}
             </p>
             <p style={{
               fontFamily: "var(--font-dm-sans)",
@@ -129,7 +130,7 @@ export function Events() {
               textTransform: "uppercase",
               margin: 0,
             }}>
-              Last Friday · 8pm
+              {events.featured.cadence}
             </p>
           </div>
         )}
@@ -149,7 +150,7 @@ export function Events() {
             maxWidth: "38ch",
           }}
         >
-          Film screenings. Book swaps. Coffee cuppings.
+          {events.categories}
         </motion.p>
 
         <motion.p
@@ -168,7 +169,7 @@ export function Events() {
 
         <motion.a
           {...itemReveal(0.28)}
-          href="https://instagram.com/beku.blr"
+          href={links.instagram}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -192,7 +193,7 @@ export function Events() {
             e.currentTarget.style.borderColor = "rgba(62,80,64,0.35)"
           }}
         >
-          @beku.blr on Instagram
+          {links.instagramHandle} on Instagram
           <span aria-hidden="true" style={{ fontSize: "0.85em", opacity: 0.6 }}>↗</span>
         </motion.a>
 

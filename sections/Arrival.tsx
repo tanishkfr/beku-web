@@ -6,6 +6,7 @@ import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
 import { OpenStatus } from "@/components/OpenStatus"
 import { EASE, H_PAD, CREAM, CREAM_DIM, CREAM_MUTED } from "@/lib/tokens"
+import { hours, rating } from "@/lib/business"
 
 const HERO_SRC = "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?auto=format&fit=crop&w=2070&q=85"
 const INTERIOR_SRC = "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2070&q=82"
@@ -149,7 +150,7 @@ export function Arrival() {
           }}
         >
           <span
-            aria-label="4.7 stars on Google"
+            aria-label={`${rating.value} stars on Google`}
             style={{
               fontFamily: "var(--font-stamp)",
               fontSize: "clamp(0.5rem, 0.62vw, 0.5625rem)",
@@ -159,7 +160,7 @@ export function Arrival() {
               textTransform: "uppercase",
             }}
           >
-            4.7 ★ · 1,892 reviews
+            {rating.value} ★ · {rating.countDisplay} reviews
           </span>
         </motion.div>
 
@@ -222,7 +223,7 @@ export function Arrival() {
           >
             <p style={{ margin: 0, color: CREAM_MUTED }}>
               <OpenStatus
-                fallback="Open every day · 11am – 11pm"
+                fallback={hours.fullLabel}
                 style={{
                   fontFamily: "var(--font-stamp)",
                   fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
