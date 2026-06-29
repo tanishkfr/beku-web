@@ -8,8 +8,8 @@ import { address, contact, hours, rating, links } from "@/lib/business"
 
 // Question: How do I find Beku, and when is it open?
 // Composition: Exhibition label typography. Name, location, hours.
-// Plus the one thing currently missing from the site: the Google rating.
-// 4.7 from 1,892 people is the strongest thing Beku has. Show it.
+// Plus the Google rating — the strongest social proof Beku has.
+// All figures come from lib/business.ts (the single source of truth).
 
 export function Visit() {
   const prefersReduced = useReducedMotion()
