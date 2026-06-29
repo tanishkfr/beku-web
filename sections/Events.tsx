@@ -115,7 +115,7 @@ export function Events() {
               fontSize: "clamp(1.375rem, 2.2vw, 1.75rem)",
               fontWeight: 400,
               fontStyle: "italic",
-              color: "var(--color-ink)",
+              color: "#1C2820",
               lineHeight: 1.05,
               margin: "0 0 0.25em 0",
             }}>

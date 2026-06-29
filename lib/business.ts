@@ -51,9 +51,9 @@ export const contact = {
 // ── Rating (from Google) ─────────────────────────────────────────────────────
 export const rating = {
   value: "4.7",
-  count: 1892,
-  /** "1,892" */
-  countDisplay: "1,892",
+  count: 1979,
+  /** "1,979" */
+  countDisplay: "1,979",
 } as const
 
 // ── External links ───────────────────────────────────────────────────────────
