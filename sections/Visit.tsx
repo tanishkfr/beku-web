@@ -1,6 +1,8 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
+import { OpenStatus } from "@/components/OpenStatus"
+import { DwellNote } from "@/components/DwellNote"
 import { EASE, H_PAD } from "@/lib/tokens"
 
 // Question: How do I find Beku, and when is it open?
@@ -144,12 +146,12 @@ export function Visit() {
             <p style={{
               fontFamily: "var(--font-stamp)",
               fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-              fontWeight: 400,
-              color: "var(--color-warmwood)",
+              fontWeight: 500,
+              color: "var(--color-label)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               margin: "0 0 0.6em 0",
-              opacity: 0.65,
+              opacity: 0.9,
             }}>
               Where
             </p>
@@ -186,15 +188,15 @@ export function Visit() {
                   gap: "0.3em",
                   fontFamily: "var(--font-dm-sans)",
                   fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
-                  fontWeight: 400,
-                  color: "var(--color-warmwood)",
+                  fontWeight: 500,
+                  color: "var(--color-label)",
                   textDecoration: "none",
-                  opacity: 0.88,
+                  opacity: 1,
                   transition: "opacity 200ms ease",
                   letterSpacing: "0.02em",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "1" }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.88" }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7" }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1" }}
               >
                 Open in Maps <span aria-hidden="true">↗</span>
               </a>
@@ -223,12 +225,12 @@ export function Visit() {
             <p style={{
               fontFamily: "var(--font-stamp)",
               fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
-              fontWeight: 400,
-              color: "var(--color-warmwood)",
+              fontWeight: 500,
+              color: "var(--color-label)",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               margin: "0 0 0.6em 0",
-              opacity: 0.65,
+              opacity: 0.9,
             }}>
               When
             </p>
@@ -242,6 +244,19 @@ export function Visit() {
             }}>
               Open every day<br />
               11am – 11pm
+            </p>
+            <p style={{ margin: "0.75em 0 0 0", color: "var(--color-text-muted)" }}>
+              <OpenStatus
+                fallback=""
+                style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.6vw, 0.5625rem)",
+                  fontWeight: 400,
+                  color: "var(--color-text-muted)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                }}
+              />
             </p>
           </div>
         </div>
@@ -259,6 +274,10 @@ export function Visit() {
       >
         Just beyond the traffic.
       </motion.p>
+
+      <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
+        If you reach the temple, you&apos;ve gone a little too far.
+      </DwellNote>
     </section>
   )
 }

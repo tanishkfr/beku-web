@@ -1,38 +1,42 @@
 "use client"
 
-import { motion, useReducedMotion, useMotionValue, useSpring, AnimatePresence } from "framer-motion"
-import { useRef, useState, useCallback } from "react"
+import React, { useState, useRef, useEffect } from "react"
+import { motion, useReducedMotion, AnimatePresence, useMotionValue, useAnimationFrame } from "framer-motion"
 import { EASE, H_PAD } from "@/lib/tokens"
+import { EXPERIMENTS } from "@/lib/experiments"
+import { DwellNote } from "@/components/DwellNote"
 
-const SPINES = [
-  { color: "#3D6147", title: "Ways of Seeing", author: "John Berger", lean: -4, height: 148 },
-  { color: "#7A5438", title: "Ghachar Ghochar", author: "Vivek Shanbhag", lean: -1.5, height: 174 },
-  { color: "#C06B30", title: "Remains of the Day", author: "Kazuo Ishiguro", lean: 0.5, height: 196, featured: true },
-  { color: "#5A7A5E", title: "Devotions", author: "Mary Oliver", lean: 2, height: 160 },
-  { color: "#9B8870", title: "Ministry for the Future", author: "Kim Stanley Robinson", lean: 3.5, height: 170 },
-]
+type Shelf = {
+  title: string
+  author: string
+  note: string
+  borrowed: string
+  color: string
+}
 
-const CARD_BOOKS = [
+// Three that keep leaving the shelf — described in Beku's own voice,
+// no named individuals.
+const FEATURED: Shelf[] = [
   {
-    picker: "Ishita",
     title: "The Remains of the Day",
     author: "Kazuo Ishiguro",
-    note: "The kind of book that makes the afternoon feel longer. We've had a copy near the counter for over a year. It's been borrowed twelve times.",
+    note: "The kind of book that makes the afternoon feel longer. We've kept a copy near the counter for over a year. It keeps leaving, and it keeps finding its way back.",
     borrowed: "XII",
+    color: "#C06B30",
   },
   {
-    picker: "Arjun",
     title: "Ghachar Ghochar",
     author: "Vivek Shanbhag",
-    note: "Short but stays with you. A family, a business, a slow unraveling. Reads in one sitting. Pairs well with filter coffee.",
+    note: "Short, but it stays with you. A family, a business, a slow unravelling. Reads in one sitting. Pairs well with a filter coffee and a free afternoon.",
     borrowed: "VIII",
+    color: "#7A5438",
   },
   {
-    picker: "Meera",
     title: "Ways of Seeing",
     author: "John Berger",
-    note: "Leave it open on any page. Something useful every time. We've tried keeping this one for the shelf. It keeps leaving.",
+    note: "Leave it open on any page and something useful looks back at you. We've tried keeping this one for the shelf. It keeps leaving.",
     borrowed: "XXI",
+    color: "#3D6147",
   },
 ]
 
@@ -44,68 +48,105 @@ const SHELF_BOOKS = [
   { title: "The God of Small Things", author: "Arundhati Roy" },
 ]
 
-function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
-  const [activeSpine, setActiveSpine] = useState<number | null>(null)
+const HORIZONTAL_SHELF = [
+  ...SHELF_BOOKS,
+  { title: "A Fine Balance", author: "Rohinton Mistry" },
+  { title: "Em and the Big Hoom", author: "Jerry Pinto" },
+  { title: "The Argumentative Indian", author: "Amartya Sen" },
+  { title: "Beloved", author: "Toni Morrison" },
+]
 
-  const handleTouchStart = useCallback((i: number) => {
-    setActiveSpine(i)
+// The drifting shelf — spines with colour + height variation.
+const TICKER_SPINES = [
+  { title: "The Remains of the Day", author: "Kazuo Ishiguro", color: "#C06B30", height: 196 },
+  { title: "Ghachar Ghochar", author: "Vivek Shanbhag", color: "#7A5438", height: 168 },
+  { title: "Ways of Seeing", author: "John Berger", color: "#3D6147", height: 150 },
+  { title: "The Ministry for the Future", author: "Kim Stanley Robinson", color: "#5A7A5E", height: 182 },
+  { title: "Devotions", author: "Mary Oliver", color: "#9B8870", height: 156 },
+  { title: "The God of Small Things", author: "Arundhati Roy", color: "#B05A3C", height: 190 },
+  { title: "A Fine Balance", author: "Rohinton Mistry", color: "#6B5438", height: 172 },
+  { title: "Em and the Big Hoom", author: "Jerry Pinto", color: "#4A6B50", height: 146 },
+  { title: "The Argumentative Indian", author: "Amartya Sen", color: "#8A6647", height: 184 },
+  { title: "Beloved", author: "Toni Morrison", color: "#3D5147", height: 162 },
+]
+
+const FEATURED_INDEX = new Map(FEATURED.map((p, i) => [p.title, i]))
+
+function ShelfTicker({ onSelect }: { onSelect: (i: number) => void }) {
+  const prefersReduced = useReducedMotion()
+  const doubled = [...TICKER_SPINES, ...TICKER_SPINES]
+  const x = useMotionValue(0)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const halfRef = useRef(0)
+  const pausedRef = useRef(false)
+
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) halfRef.current = trackRef.current.scrollWidth / 2
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
   }, [])
 
-  const handleTouchEnd = useCallback(() => {
-    setTimeout(() => setActiveSpine(null), 700)
-  }, [])
+  useAnimationFrame((_, delta) => {
+    if (prefersReduced || pausedRef.current) return
+    const half = halfRef.current
+    if (!half) return
+    let next = x.get() - (delta / 1000) * 40 // 40px/s — calm but clearly moving
+    if (next <= -half) next += half
+    x.set(next)
+  })
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: "-8%" }}
-      transition={{ duration: 1.0, delay: 0.1, ease: EASE }}
+    <div
+      className="beku-ticker"
+      onMouseEnter={() => { pausedRef.current = true }}
+      onMouseLeave={() => { pausedRef.current = false }}
+      style={{
+        marginLeft: `calc(-1 * ${H_PAD})`,
+        marginRight: `calc(-1 * ${H_PAD})`,
+        position: "relative",
+        overflowX: prefersReduced ? "auto" : "hidden",
+        overflowY: "hidden",
+        height: "232px",
+        WebkitMaskImage: "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)",
+        maskImage: "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)",
+      }}
     >
-      {/* Spine row */}
-      <div
+      <motion.div
+        ref={trackRef}
         style={{
+          x,
           display: "flex",
           alignItems: "flex-end",
-          gap: "clamp(5px, 0.9vw, 10px)",
-          paddingBottom: "12px",
-          borderBottom: "3px solid rgba(130,100,65,0.22)",
-          width: "fit-content",
+          gap: "clamp(8px, 1vw, 14px)",
+          width: "max-content",
+          height: "100%",
+          paddingBottom: "18px",
         }}
       >
-        {SPINES.map((spine, i) => (
-          <motion.div
-            key={spine.title}
-            initial={{ y: prefersReduced ? 0 : 28, opacity: prefersReduced ? 1 : 0 }}
-            whileInView={{ y: spine.featured ? -8 : 0, opacity: 1 }}
-            viewport={{ once: true, margin: "-8%" }}
-            transition={{ duration: 0.55, delay: prefersReduced ? 0 : 0.15 + i * 0.09, ease: EASE }}
-          >
-            <motion.div
-              animate={{
-                y: activeSpine === i && !prefersReduced ? -5 : 0,
-                rotate: spine.lean,
-              }}
-              transition={{ type: "spring", stiffness: 420, damping: 28 }}
-              onMouseEnter={() => setActiveSpine(i)}
-              onMouseLeave={() => setActiveSpine(null)}
-              onTouchStart={(e) => { e.preventDefault(); handleTouchStart(i) }}
-              onTouchEnd={handleTouchEnd}
+        {doubled.map((s, i) => {
+          const featuredIdx = FEATURED_INDEX.get(s.title)
+          return (
+            <button
+              key={i}
+              className="beku-spine"
+              aria-label={`${s.title} by ${s.author}`}
+              onClick={() => { if (featuredIdx !== undefined) onSelect(featuredIdx) }}
               style={{
-                width: "clamp(22px, 2.2vw, 34px)",
-                height: `${spine.height}px`,
-                backgroundColor: spine.color,
+                flex: "0 0 auto",
+                width: "clamp(26px, 2.4vw, 40px)",
+                height: `${s.height}px`,
+                backgroundColor: s.color,
                 borderRadius: "2px 2px 0 0",
-                transformOrigin: "bottom center",
-                cursor: "default",
+                border: "none",
+                padding: 0,
                 position: "relative",
                 overflow: "hidden",
+                transformOrigin: "bottom center",
+                boxShadow: "2px 3px 12px rgba(30,40,20,0.16), inset -1px 0 0 rgba(255,255,255,0.06)",
                 WebkitTapHighlightColor: "transparent",
-                boxShadow: activeSpine === i
-                  ? "4px 8px 20px rgba(30,40,20,0.3), inset -1px 0 0 rgba(255,255,255,0.12)"
-                  : spine.featured
-                    ? "3px 6px 18px rgba(30,40,20,0.26), inset -1px 0 0 rgba(255,255,255,0.08)"
-                    : "2px 3px 10px rgba(30,40,20,0.14), inset -1px 0 0 rgba(255,255,255,0.05)",
               }}
             >
               <span style={{
@@ -115,103 +156,43 @@ function ShelfSpines({ prefersReduced }: { prefersReduced: boolean | null }) {
                 transform: "translate(-50%, -50%) rotate(-90deg)",
                 transformOrigin: "center center",
                 fontFamily: "var(--font-stamp)",
-                fontSize: "7px",
-                color: "rgba(255,255,255,0.45)",
+                fontSize: "8px",
+                color: "rgba(246,240,228,0.62)",
                 whiteSpace: "nowrap",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                userSelect: "none",
-                pointerEvents: "none",
-                width: `${spine.height - 20}px`,
+                width: `${s.height - 24}px`,
                 textAlign: "center",
                 overflow: "hidden",
+                pointerEvents: "none",
               }}>
-                {spine.title}
+                {s.title}
               </span>
-              {spine.featured && (
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0,
-                  height: "4px",
-                  backgroundColor: "rgba(255,255,255,0.18)",
+              {featuredIdx !== undefined && (
+                <span aria-hidden="true" style={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: "4px",
+                  backgroundColor: "rgba(255,255,255,0.22)",
                 }} />
               )}
-            </motion.div>
-          </motion.div>
-        ))}
-      </div>
+            </button>
+          )
+        })}
+      </motion.div>
 
-      {/* Info strip below shelf plank */}
-      <div style={{ height: "2.5rem", marginTop: "0.6rem", display: "flex", alignItems: "center" }}>
-        <AnimatePresence mode="wait">
-          {activeSpine !== null && !prefersReduced ? (
-            <motion.div
-              key={activeSpine}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -3 }}
-              transition={{ duration: 0.14, ease: EASE }}
-              style={{ display: "flex", alignItems: "baseline", gap: "0.6rem" }}
-            >
-              <span style={{
-                fontFamily: "var(--font-cormorant)",
-                fontSize: "clamp(0.9375rem, 1.2vw, 1.0625rem)",
-                fontWeight: 400,
-                fontStyle: "italic",
-                color: "var(--color-ink)",
-                lineHeight: 1.2,
-              }}>
-                {SPINES[activeSpine].title}
-              </span>
-              <span style={{
-                fontFamily: "var(--font-dm-sans)",
-                fontSize: "0.6875rem",
-                fontWeight: 300,
-                color: "var(--color-text-muted)",
-                letterSpacing: "0.03em",
-              }}>
-                {SPINES[activeSpine].author}
-              </span>
-            </motion.div>
-          ) : (
-            <motion.p
-              key="shelf-label"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.45 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: EASE }}
-              style={{
-                fontFamily: "var(--font-stamp)",
-                fontSize: "0.4375rem",
-                color: "var(--color-text-muted)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
-              The current shelf
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+      {/* Shelf plank */}
+      <div aria-hidden="true" style={{
+        position: "absolute", left: 0, right: 0, bottom: "18px",
+        height: "3px", backgroundColor: "rgba(130,100,65,0.3)",
+      }} />
+    </div>
   )
 }
 
 export function Books() {
   const prefersReduced = useReducedMotion()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const tiltX = useMotionValue(0)
-  const tiltY = useMotionValue(0)
-  const springX = useSpring(tiltX, { stiffness: 320, damping: 32 })
-  const springY = useSpring(tiltY, { stiffness: 320, damping: 32 })
-  const [cardIndex, setCardIndex] = useState(0)
-
-  const advanceCard = useCallback(() => {
-    setCardIndex((i) => (i + 1) % CARD_BOOKS.length)
-  }, [])
-
-  const book = CARD_BOOKS[cardIndex]
+  const [active, setActive] = useState(0)
+  const [hovered, setHovered] = useState<number | null>(null)
+  const book = FEATURED[active]
 
   return (
     <section
@@ -225,291 +206,383 @@ export function Books() {
         backgroundColor: "var(--color-bg-books)",
       }}
     >
-      {/* Section eyebrow */}
+      {/* Eyebrow */}
       <motion.h2
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 0.6 }}
+        whileInView={{ opacity: 0.85 }}
         viewport={{ once: true, margin: "-6%" }}
         transition={{ duration: 0.9, ease: EASE }}
         style={{
           fontFamily: "var(--font-stamp)",
           fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
+          fontWeight: 500,
+          color: "var(--color-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           margin: "0 0 clamp(1.5rem, 3.5vh, 2.25rem) 0",
         }}
       >
-        The bookshelf
+        Upstairs, the library
       </motion.h2>
 
-      {/* Book spines */}
-      <div style={{ marginBottom: "clamp(4rem, 9vh, 7rem)" }}>
-        <ShelfSpines prefersReduced={prefersReduced} />
-      </div>
-
-      {/* Staff pick card + reading list */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-2"
-        style={{ gap: "clamp(3rem, 6vw, 6rem)", alignItems: "start" }}
-      >
-        {/* Staff pick card — click/tap to cycle through picks */}
+      {/* Base element: the drifting shelf */}
+      {EXPERIMENTS.booksTicker && (
         <motion.div
-          initial={{ opacity: 0, y: prefersReduced ? 0 : 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: prefersReduced ? 1 : 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-6%" }}
-          transition={{ duration: 1.0, ease: EASE }}
+          transition={{ duration: 1.1, ease: EASE }}
+          style={{ marginBottom: "clamp(3rem, 7vh, 5rem)" }}
         >
-          <div
-            ref={containerRef}
-            onMouseMove={(e) => {
-              if (prefersReduced || !containerRef.current) return
-              const { left, top, width, height } = containerRef.current.getBoundingClientRect()
-              tiltX.set(((e.clientY - top) / height - 0.5) * -7)
-              tiltY.set(((e.clientX - left) / width - 0.5) * 7)
-            }}
-            onMouseLeave={() => { tiltX.set(0); tiltY.set(0) }}
-            onClick={advanceCard}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") advanceCard() }}
-            role="button"
-            tabIndex={0}
-            aria-label={`Staff pick: ${book.title}. Tap to see more picks.`}
-            style={{ position: "relative", perspective: "1000px", cursor: "pointer" }}
-          >
-            <motion.div
-              style={{
-                position: "relative",
-                ...(prefersReduced ? {} : { rotateX: springX, rotateY: springY }),
-              }}
-            >
-              {/* Ghost cards */}
-              {!prefersReduced && (
-                <>
-                  <motion.div
-                    key={`ghost1-${cardIndex}`}
-                    aria-hidden="true"
-                    initial={{ rotate: 4.5, x: 9, y: -7 }}
-                    animate={{ rotate: 3, x: 7, y: -5 }}
-                    transition={{ type: "spring", stiffness: 280, damping: 22 }}
-                    style={{
-                      position: "absolute", inset: 0,
-                      backgroundColor: "rgba(200,190,170,0.5)", borderRadius: "3px",
-                      boxShadow: "1px 2px 10px rgba(30,50,30,0.07)",
-                    }}
-                  />
-                  <motion.div
-                    key={`ghost2-${cardIndex}`}
-                    aria-hidden="true"
-                    initial={{ rotate: 2.5, x: 5, y: -4 }}
-                    animate={{ rotate: 1.4, x: 3, y: -2 }}
-                    transition={{ type: "spring", stiffness: 280, damping: 24 }}
-                    style={{
-                      position: "absolute", inset: 0,
-                      backgroundColor: "rgba(215,205,185,0.6)", borderRadius: "3px",
-                      boxShadow: "1px 2px 8px rgba(30,50,30,0.06)",
-                    }}
-                  />
-                </>
-              )}
+          <ShelfTicker onSelect={setActive} />
+          <p style={{
+            fontFamily: "var(--font-stamp)", fontSize: "0.5rem",
+            color: "var(--color-label)", letterSpacing: "0.12em",
+            textTransform: "uppercase", opacity: 0.7, margin: "clamp(0.75rem,2vh,1.1rem) 0 0 0",
+          }}>
+            The current shelf · hover to stop · the marked ones we keep talking about
+          </p>
+        </motion.div>
+      )}
 
-              {/* Bookmark */}
-              {!prefersReduced && (
-                <div aria-hidden="true" style={{
-                  position: "absolute", top: "-2.4rem",
-                  left: "clamp(2.25rem, 4.5vw, 3.25rem)",
-                  width: "0.9375rem", height: "2.75rem",
-                  backgroundColor: "var(--color-terracotta)", opacity: 0.62, zIndex: 4,
-                  clipPath: "polygon(0 0, 100% 0, 100% 76%, 50% 100%, 0 76%)",
-                  boxShadow: "1px 3px 8px rgba(30,50,30,0.14)",
-                }} />
-              )}
+      {/* Featured — selector + editorial pull-quote */}
+      <motion.div
+        initial={{ opacity: 0, y: prefersReduced ? 0 : 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-6%" }}
+        transition={{ duration: 0.9, ease: EASE }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "clamp(2rem, 5vw, 4.5rem)",
+          alignItems: "flex-start",
+          marginBottom: EXPERIMENTS.booksTicker ? 0 : "clamp(4rem, 9vh, 7rem)",
+        }}
+      >
+        {/* Selector */}
+        <div
+          role="tablist"
+          aria-label="Books that keep leaving the shelf"
+          style={{ flex: "1 1 220px", minWidth: "min(220px, 100%)", display: "flex", flexDirection: "column" }}
+        >
+          <p style={{
+            fontFamily: "var(--font-stamp)",
+            fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+            fontWeight: 500,
+            color: "var(--color-label)",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0",
+            opacity: 0.8,
+          }}>
+            Three that keep leaving
+          </p>
 
-              {/* Main card */}
-              <motion.div
-                whileTap={prefersReduced ? {} : { scale: 0.987 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          {FEATURED.map((b, i) => {
+            const isActive = i === active
+            const isHover = EXPERIMENTS.hoverMotion && hovered === i
+            const lit = isActive || isHover
+            return (
+              <button
+                key={b.title}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActive(i)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
                 style={{
-                  backgroundColor: "var(--color-offwhite)",
-                  border: "1px solid rgba(200,190,170,0.9)", borderRadius: "3px",
-                  padding: "clamp(1.75rem, 5vh, 3rem) clamp(1.5rem, 4vw, 2.75rem)",
-                  paddingBottom: "clamp(3rem, 6vh, 4rem)",
-                  transform: prefersReduced ? "none" : "rotate(-0.4deg)",
-                  position: "relative",
-                  boxShadow: "3px 6px 24px rgba(40,60,30,0.10), 0 1px 4px rgba(40,60,30,0.06), inset 0 1px 0 rgba(255,255,255,0.72)",
-                  zIndex: 2,
+                  display: "flex",
+                  alignItems: "stretch",
+                  gap: "0.85rem",
+                  background: "none",
+                  border: "none",
+                  borderTop: "1px solid rgba(175,150,115,0.22)",
+                  padding: "clamp(0.85rem, 2vh, 1.15rem) 0",
+                  paddingLeft: isHover && !isActive ? "0.4rem" : 0,
+                  textAlign: "left",
+                  cursor: "pointer",
+                  width: "100%",
+                  transition: "padding-left 260ms var(--ease-natural)",
                   WebkitTapHighlightColor: "transparent",
-                  minHeight: "15rem",
                 }}
               >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={cardIndex}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.26, ease: EASE }}
-                  >
-                    <p style={{
-                      fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-                      fontWeight: 400, color: "var(--color-moss-signal)", letterSpacing: "0.14em",
-                      textTransform: "uppercase", margin: "0 0 clamp(1.125rem, 3vh, 1.625rem) 0", opacity: 0.7,
-                    }}>
-                      Book Pick · {book.picker}
-                    </p>
-                    <p style={{
-                      fontFamily: "var(--font-cormorant)", fontSize: "clamp(1.375rem, 2.6vw, 2rem)",
-                      fontWeight: 400, fontStyle: "italic", color: "var(--color-ink)", lineHeight: 1.18,
-                      margin: "0 0 0.18em 0",
-                    }}>
-                      {book.title}
-                    </p>
-                    <p style={{
-                      fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.8125rem, 1vw, 0.9375rem)",
-                      fontWeight: 300, color: "var(--color-text-secondary)",
-                      margin: "0 0 clamp(1rem, 2.5vh, 1.5rem) 0",
-                    }}>
-                      {book.author}
-                    </p>
-                    <p style={{
-                      fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.875rem, 1.05vw, 1rem)",
-                      fontWeight: 400, color: "var(--color-text-secondary)", lineHeight: 1.72,
-                      margin: 0, maxWidth: "34ch",
-                    }}>
-                      {book.note}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Borrowed stamp */}
-                {!prefersReduced && (
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`stamp-${cardIndex}`}
-                      initial={{ opacity: 0, rotate: -4 }}
-                      animate={{ opacity: 0.45, rotate: -3 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4, ease: EASE }}
-                      aria-hidden="true"
-                      style={{
-                        position: "absolute",
-                        top: "clamp(1.125rem, 2.5vh, 1.5rem)",
-                        right: "clamp(1.125rem, 2.5vw, 1.5rem)",
-                        fontFamily: "var(--font-stamp)", fontSize: "0.4375rem",
-                        color: "var(--color-moss-signal)", letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        border: "0.75px solid rgba(61,97,71,0.3)", padding: "0.22em 0.55em",
-                      }}
-                    >
-                      Borrowed {book.borrowed} times
-                    </motion.div>
-                  </AnimatePresence>
-                )}
-
-                {/* Dots + tap hint */}
-                <div style={{
-                  position: "absolute",
-                  bottom: "clamp(1rem, 2vh, 1.25rem)",
-                  left: "clamp(1.5rem, 4vw, 2.75rem)",
-                  right: "clamp(1.5rem, 4vw, 2.75rem)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                    {CARD_BOOKS.map((_, di) => (
-                      <div
-                        key={di}
-                        aria-hidden="true"
-                        style={{
-                          width: di === cardIndex ? "14px" : "4px",
-                          height: "2px",
-                          borderRadius: "2px",
-                          backgroundColor: di === cardIndex
-                            ? "rgba(61,97,71,0.55)"
-                            : "rgba(61,97,71,0.2)",
-                          transition: "width 300ms ease, background-color 300ms ease",
-                        }}
-                      />
-                    ))}
-                  </div>
+                {/* Spine edge */}
+                <motion.span
+                  aria-hidden="true"
+                  animate={{ opacity: lit ? 1 : 0.3, scaleY: isActive ? 1 : lit ? 0.85 : 0.7 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  style={{
+                    width: "3px",
+                    flexShrink: 0,
+                    backgroundColor: b.color,
+                    borderRadius: "2px",
+                    transformOrigin: "center",
+                  }}
+                />
+                <span style={{ minWidth: 0 }}>
                   <span style={{
-                    fontFamily: "var(--font-stamp)",
-                    fontSize: "0.4375rem",
-                    color: "var(--color-text-muted)",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    opacity: 0.5,
+                    display: "block",
+                    fontFamily: "var(--font-cormorant)",
+                    fontSize: "clamp(1.125rem, 1.7vw, 1.4rem)",
+                    fontWeight: 400,
+                    fontStyle: "italic",
+                    color: lit ? "var(--color-ink)" : "var(--color-text-secondary)",
+                    lineHeight: 1.2,
+                    transition: "color 260ms ease",
                   }}>
-                    Tap to browse
+                    {b.title}
                   </span>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.div>
+                  <span style={{
+                    display: "block",
+                    fontFamily: "var(--font-dm-sans)",
+                    fontSize: "clamp(0.75rem, 0.85vw, 0.8125rem)",
+                    fontWeight: 400,
+                    color: "var(--color-text-muted)",
+                    lineHeight: 1.4,
+                    marginTop: "0.2em",
+                  }}>
+                    {b.author}
+                  </span>
+                </span>
+              </button>
+            )
+          })}
+          <div aria-hidden="true" style={{ borderTop: "1px solid rgba(175,150,115,0.22)" }} />
+        </div>
 
-        {/* Reading list */}
+        {/* Feature */}
+        <div
+          aria-live="polite"
+          style={{ flex: "1.5 1 340px", minWidth: "min(340px, 100%)", minHeight: "clamp(15rem, 30vh, 19rem)" }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: prefersReduced ? 0 : -8 }}
+              transition={{ duration: 0.4, ease: EASE }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6em", margin: "0 0 clamp(1rem, 2.5vh, 1.5rem) 0" }}>
+                <span aria-hidden="true" style={{ width: "1.5rem", height: "2px", backgroundColor: book.color, borderRadius: "2px" }} />
+                <span style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+                  fontWeight: 500,
+                  color: "var(--color-label)",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}>
+                  Keeps leaving the shelf
+                </span>
+              </div>
+
+              <blockquote style={{
+                fontFamily: "var(--font-cormorant)",
+                fontSize: "clamp(1.5rem, 2.7vw, 2.375rem)",
+                fontWeight: 400,
+                fontStyle: "italic",
+                color: "var(--color-ink)",
+                lineHeight: 1.32,
+                letterSpacing: "-0.01em",
+                margin: 0,
+                maxWidth: "30ch",
+                textWrap: "balance",
+              } as React.CSSProperties}>
+                {book.note}
+              </blockquote>
+
+              <div style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "1rem",
+                marginTop: "clamp(1.75rem, 4vh, 2.75rem)",
+                paddingTop: "clamp(1rem, 2.5vh, 1.5rem)",
+                borderTop: "1px solid rgba(175,150,115,0.3)",
+                maxWidth: "34ch",
+              }}>
+                <p style={{
+                  fontFamily: "var(--font-cormorant)",
+                  fontSize: "clamp(1rem, 1.4vw, 1.1875rem)",
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.3,
+                  margin: 0,
+                }}>
+                  {book.title}
+                  <span style={{
+                    fontFamily: "var(--font-dm-sans)",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontSize: "0.8125rem",
+                    color: "var(--color-text-muted)",
+                    marginLeft: "0.6em",
+                  }}>
+                    {book.author}
+                  </span>
+                </p>
+
+                <span style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "0.5rem",
+                  color: "var(--color-label)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  border: "1px solid rgba(90,58,34,0.35)",
+                  borderRadius: 0,
+                  padding: "0.32em 0.6em",
+                  transform: "rotate(-1.5deg)",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}>
+                  Borrowed {book.borrowed} times
+                </span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      {/* Also on the shelves — only when the ticker isn't carrying the shelf */}
+      {!EXPERIMENTS.booksTicker && (
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-6%" }}
-          transition={{ duration: 0.8, delay: prefersReduced ? 0 : 0.18, ease: EASE }}
+          transition={{ duration: 0.8, delay: prefersReduced ? 0 : 0.1, ease: EASE }}
         >
-          <h3 style={{
-            fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
-            fontWeight: 400, color: "var(--color-moss-signal)", letterSpacing: "0.15em",
-            textTransform: "uppercase", margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0", opacity: 0.58,
+          <div style={{
+            display: "flex", alignItems: "baseline", justifyContent: "space-between",
+            gap: "1rem", margin: "0 0 clamp(0.75rem, 2vh, 1rem) 0", flexWrap: "wrap",
           }}>
-            Also on the shelves
-          </h3>
+            <h3 style={{
+              fontFamily: "var(--font-stamp)", fontSize: "clamp(0.4375rem, 0.55vw, 0.5rem)",
+              fontWeight: 500, color: "var(--color-label)", letterSpacing: "0.15em",
+              textTransform: "uppercase", margin: 0, opacity: 0.8,
+            }}>
+              Also on the shelves
+            </h3>
+            {EXPERIMENTS.horizontalShelf && (
+              <span aria-hidden="true" style={{
+                fontFamily: "var(--font-stamp)", fontSize: "0.4375rem",
+                color: "var(--color-text-muted)", letterSpacing: "0.12em",
+                textTransform: "uppercase", opacity: 0.7, whiteSpace: "nowrap",
+              }}>
+                Scan →
+              </span>
+            )}
+          </div>
 
-          <ul
-            aria-label="Other books on the shelves"
-            style={{ listStyle: "none", padding: 0, margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0" }}
-          >
-            {SHELF_BOOKS.map((b, i) => (
-              <motion.li
-                key={b.title}
-                initial={{ opacity: 0, x: prefersReduced ? 0 : -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                whileTap={prefersReduced ? {} : { x: 5, opacity: 0.65 }}
-                viewport={{ once: true, margin: "-6%" }}
-                transition={{ duration: 0.6, delay: prefersReduced ? 0 : 0.22 + i * 0.07, ease: EASE }}
-                style={{
-                  display: "flex", alignItems: "baseline", gap: "1rem",
-                  padding: "0.65em 0",
-                  borderTop: "1px solid rgba(175,150,115,0.18)",
-                  WebkitTapHighlightColor: "transparent",
-                }}
-              >
-                <span style={{
-                  fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
-                  fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
-                  lineHeight: 1.3, flex: "1 1 auto", minWidth: 0,
-                }}>
-                  {b.title}
-                </span>
-                <span style={{
-                  fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
-                  fontWeight: 300, color: "var(--color-text-muted)",
-                  whiteSpace: "nowrap", flexShrink: 0,
-                }}>
-                  {b.author}
-                </span>
-              </motion.li>
-            ))}
-            <li aria-hidden="true" style={{ borderTop: "1px solid rgba(175,150,115,0.18)", height: 0 }} />
-          </ul>
-
-          <p style={{
-            fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.8125rem, 1vw, 0.9375rem)",
-            fontWeight: 300, color: "var(--color-text-secondary)", letterSpacing: "0.03em", margin: 0,
-          }}>
-            The shelves change often. That&apos;s part of the point.
-          </p>
+          {EXPERIMENTS.horizontalShelf ? (
+            <div
+              aria-label="Other books on the shelves"
+              tabIndex={0}
+              className="beku-shelf-scroll"
+              style={{
+                display: "flex",
+                gap: "clamp(0.85rem, 1.8vw, 1.4rem)",
+                overflowX: "auto",
+                scrollSnapType: "x mandatory",
+                padding: "0 0 1rem 0",
+                margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0",
+                scrollbarWidth: "thin",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {HORIZONTAL_SHELF.map((b) => (
+                <div
+                  key={b.title}
+                  tabIndex={0}
+                  aria-label={`${b.title} by ${b.author}`}
+                  style={{
+                    scrollSnapAlign: "start",
+                    flex: "0 0 auto",
+                    width: "clamp(150px, 42vw, 185px)",
+                    borderLeft: "1px solid rgba(175,150,115,0.35)",
+                    paddingLeft: "clamp(0.7rem, 1.5vw, 1rem)",
+                    minHeight: "5.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.2rem)",
+                    fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
+                    lineHeight: 1.25, marginBottom: "0.4em",
+                  }}>
+                    {b.title}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
+                    fontWeight: 400, color: "var(--color-text-muted)",
+                  }}>
+                    {b.author}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ul
+              aria-label="Other books on the shelves"
+              style={{ listStyle: "none", padding: 0, margin: "0 0 clamp(1.5rem,4vh,2.25rem) 0" }}
+            >
+              {SHELF_BOOKS.map((b, i) => (
+                <motion.li
+                  key={b.title}
+                  initial={{ opacity: 0, x: prefersReduced ? 0 : -8 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-6%" }}
+                  transition={{ duration: 0.6, delay: prefersReduced ? 0 : 0.18 + i * 0.07, ease: EASE }}
+                  style={{
+                    display: "flex", alignItems: "baseline", gap: "1rem",
+                    padding: "0.65em 0",
+                    borderTop: "1px solid rgba(175,150,115,0.18)",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "var(--font-cormorant)", fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+                    fontWeight: 400, fontStyle: "italic", color: "var(--color-text-secondary)",
+                    lineHeight: 1.3, flex: "1 1 auto", minWidth: 0,
+                  }}>
+                    {b.title}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.6875rem, 0.8vw, 0.8125rem)",
+                    fontWeight: 400, color: "var(--color-text-muted)",
+                    whiteSpace: "nowrap", flexShrink: 0,
+                  }}>
+                    {b.author}
+                  </span>
+                </motion.li>
+              ))}
+              <li aria-hidden="true" style={{ borderTop: "1px solid rgba(175,150,115,0.18)", height: 0 }} />
+            </ul>
+          )}
         </motion.div>
-      </div>
+      )}
+
+      {/* Closing line */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-6%" }}
+        transition={{ duration: 0.8, delay: prefersReduced ? 0 : 0.1, ease: EASE }}
+        style={{ marginTop: EXPERIMENTS.booksTicker ? "clamp(3rem, 7vh, 5rem)" : 0 }}
+      >
+        <p style={{
+          fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.8125rem, 1vw, 0.9375rem)",
+          fontWeight: 400, color: "var(--color-text-secondary)", letterSpacing: "0.03em", margin: 0,
+        }}>
+          The shelves change often. That&apos;s part of the point.
+        </p>
+
+        <DwellNote style={{ marginTop: "clamp(1.25rem, 3vh, 2rem)" }}>
+          Half of these were left behind, not bought.
+        </DwellNote>
+      </motion.div>
     </section>
   )
 }

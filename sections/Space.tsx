@@ -4,6 +4,7 @@ import Image from "next/image"
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
+import { DwellNote } from "@/components/DwellNote"
 
 const GARDEN_SRC = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=2070&q=82"
 
@@ -113,6 +114,9 @@ export function Space() {
         }}>
           The trees didn&apos;t change.
         </p>
+        <DwellNote style={{ marginTop: "clamp(1rem, 2.5vh, 1.5rem)" }}>
+          By afternoon the tables go green under the tree.
+        </DwellNote>
       </motion.div>
     </section>
   )

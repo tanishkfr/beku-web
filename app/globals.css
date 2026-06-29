@@ -24,6 +24,8 @@
   --color-text-secondary: #3E5040;
   --color-text-muted: #4A5640;
   --color-divider: #C8C0AA;
+  /* Small uppercase labels — deep warm brown, AA on every light section bg */
+  --color-label: #5A3A22;
 
   /* Section backgrounds — a sequence of light across a long afternoon */
   --color-bg-arrival: #182820;   /* deep forest green — the canopy at dusk */
@@ -134,11 +136,83 @@ img {
   height: auto;
 }
 
+/* --- Horizontal shelf scrollbar (experiment: horizontalShelf) --- */
+.beku-shelf-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+.beku-shelf-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.beku-shelf-scroll::-webkit-scrollbar-thumb {
+  background: rgba(175, 150, 115, 0.4);
+  border-radius: 2px;
+}
+
+/* --- Custom cursor (experiment: customCursor) --- */
+.beku-cursor-active,
+.beku-cursor-active * {
+  cursor: none !important;
+}
+
+/* --- Books shelf ticker (experiment: booksTicker) --- */
+/* Drift is driven in JS (useAnimationFrame); CSS only handles spine hover. */
+.beku-spine {
+  transition: transform 320ms var(--ease-natural), box-shadow 320ms var(--ease-natural);
+}
+.beku-spine:hover,
+.beku-spine:focus-visible {
+  transform: translateY(-9px);
+  box-shadow: 4px 12px 26px rgba(30, 40, 20, 0.3), inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
 /* --- Focus visible --- */
 :focus-visible {
   outline: 2px solid var(--color-moss);
   outline-offset: 3px;
   border-radius: 2px;
+}
+
+/* --- Time-aware light (experiment: timeAwareLight) ---
+   Shifts the palette's temperature to match the visitor's local hour.
+   Scoped to light mode so it never fights the dark-mode overrides below.
+   Midday = the default tokens (no override needed). */
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  :root[data-phase="morning"] {
+    --color-paper: #F4F1EA;
+    --color-bg-arrival: #1A2C24;
+    --color-bg-story: #E8E6D4;
+    --color-bg-space: #C8DCC2;
+    --color-bg-food: #F7F6F0;
+    --color-bg-books: #E2DCC2;
+    --color-bg-reviews: #DAD4BE;
+    --color-bg-secret: #F2F1EC;
+    --color-bg-events: #DCDAD4;
+    --color-bg-visit: #CCC8BA;
+  }
+  :root[data-phase="golden"] {
+    --color-paper: #F2E7D0;
+    --color-bg-arrival: #16241C;
+    --color-bg-story: #ECDFBE;
+    --color-bg-space: #C2D2A8;
+    --color-bg-food: #F7EFDC;
+    --color-bg-books: #E2D2A8;
+    --color-bg-reviews: #DCC9A0;
+    --color-bg-secret: #F3EDDD;
+    --color-bg-events: #DED6C2;
+    --color-bg-visit: #CCC0A0;
+  }
+  :root[data-phase="night"] {
+    --color-paper: #EFE6D2;
+    --color-bg-arrival: #101E16;
+    --color-bg-story: #E4DAC0;
+    --color-bg-space: #B8C8AE;
+    --color-bg-food: #F0E8D6;
+    --color-bg-books: #DCD0AE;
+    --color-bg-reviews: #D6C8A6;
+    --color-bg-secret: #EDE8D8;
+    --color-bg-events: #D8D2C4;
+    --color-bg-visit: #C6C0AC;
+  }
 }
 
 /* --- Dark mode --- */
@@ -151,6 +225,7 @@ img {
     --color-text-secondary: #A0A882;
     --color-text-muted: #6A7A60;
     --color-divider: #2E4038;
+    --color-label: #C9A878;
 
     --color-bg-story: #1A2B16;
     --color-bg-space: #141C14;

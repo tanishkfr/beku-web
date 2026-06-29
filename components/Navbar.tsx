@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
+import { EXPERIMENTS } from "@/lib/experiments"
 import { EASE, CREAM, H_PAD } from "@/lib/tokens"
 
 const NAV_LINKS = [
@@ -14,8 +15,15 @@ const NAV_LINKS = [
   { label: "About",  href: "/about" },
 ]
 
+// When the room rail handles in-page wayfinding, the desktop navbar steps back
+// to just the wordmark + About. Flip roomsNav off and the full nav returns.
+const DESKTOP_LINKS = EXPERIMENTS.roomsNav
+  ? NAV_LINKS.filter((l) => l.href === "/about")
+  : NAV_LINKS
+
 export function Navbar() {
   const { heroBekuVisible } = useArrivalContext()
+  const prefersReduced = useReducedMotion()
 
   const [inArrival, setInArrival]     = useState(true)
   const [inDarkAbout, setInDarkAbout] = useState(false)
@@ -105,14 +113,15 @@ export function Navbar() {
             {!heroBekuVisible && (
               <motion.div
                 layoutId="beku-wordmark"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: prefersReduced ? 1 : 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  layout: { type: "spring", stiffness: 260, damping: 32 },
-                  opacity: { duration: 0.25, ease: EASE },
+                exit={{ opacity: 1 }}
+                transition={prefersReduced ? { duration: 0 } : {
+                  // Tween matched to the hero side so the hand-off is continuous.
+                  layout: { duration: 0.5, ease: EASE },
+                  opacity: { duration: 0.3, ease: EASE },
                 }}
-                style={{ zIndex: 51 }}
+                style={{ zIndex: 51, transformOrigin: "left top", willChange: "transform" }}
               >
                 <Link
                   href="/"
@@ -122,14 +131,14 @@ export function Navbar() {
                     fontSize: "1.3125rem",
                     fontWeight: 400,
                     color: (mobileOpen || isDark) ? CREAM : "var(--color-forest)",
-                    letterSpacing: "0.04em",
+                    letterSpacing: "0.03em",
                     textDecoration: "none",
                     transition: "color 350ms ease",
                     display: "block",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  Beku
+                  Beku.
                 </Link>
               </motion.div>
             )}
@@ -144,7 +153,7 @@ export function Navbar() {
           className="hidden md:flex items-center"
           style={{ gap: "2rem" }}
         >
-          {NAV_LINKS.map(({ label, href }) => {
+          {DESKTOP_LINKS.map(({ label, href }) => {
             const isHovered = hoveredLink === href
             return (
               <Link

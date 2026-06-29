@@ -4,6 +4,7 @@ import React from "react"
 import Image from "next/image"
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion"
 import { useArrivalContext } from "@/contexts/ArrivalContext"
+import { OpenStatus } from "@/components/OpenStatus"
 import { EASE, H_PAD, CREAM, CREAM_DIM, CREAM_MUTED } from "@/lib/tokens"
 
 const HERO_SRC = "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?auto=format&fit=crop&w=2070&q=85"
@@ -15,11 +16,11 @@ function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
       layoutId="beku-wordmark"
       initial={{ opacity: prefersReduced ? 1 : 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{ opacity: 1 }}
       transition={prefersReduced ? { duration: 0 } : {
-        layout: { type: "spring", stiffness: 260, damping: 32 },
-        // No delay on opacity — the FLIP carries visual continuity
-        opacity: { duration: 0.35, ease: EASE },
+        // Tween, not spring — a spring across an ~8x size morph jitters.
+        layout: { duration: 0.5, ease: EASE },
+        opacity: { duration: 0.3, ease: EASE },
       }}
       style={{
         fontFamily: "var(--font-cormorant)",
@@ -29,6 +30,8 @@ function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
         letterSpacing: "0.03em",
         lineHeight: 0.86,
         whiteSpace: "nowrap",
+        transformOrigin: "left top",
+        willChange: "transform",
         margin: "0 0 clamp(1.25rem, 3vh, 2rem) 0",
       }}
     >
@@ -217,16 +220,18 @@ export function Arrival() {
               paddingBottom: "clamp(1.25rem, 2.5vh, 1.875rem)",
             }}
           >
-            <p style={{
-              fontFamily: "var(--font-stamp)",
-              fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-              fontWeight: 400,
-              color: CREAM_MUTED,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}>
-              Open every day · 11am – 11pm
+            <p style={{ margin: 0, color: CREAM_MUTED }}>
+              <OpenStatus
+                fallback="Open every day · 11am – 11pm"
+                style={{
+                  fontFamily: "var(--font-stamp)",
+                  fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
+                  fontWeight: 400,
+                  color: CREAM_MUTED,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
+              />
             </p>
             <span
               lang="kn"

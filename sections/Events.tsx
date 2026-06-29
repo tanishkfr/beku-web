@@ -3,6 +3,8 @@
 import Image from "next/image"
 import { motion, useReducedMotion } from "framer-motion"
 import { EASE, H_PAD, IMG_PAD } from "@/lib/tokens"
+import { EXPERIMENTS } from "@/lib/experiments"
+import { DwellNote } from "@/components/DwellNote"
 
 const EVENTS_SRC = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2070&q=82"
 
@@ -34,13 +36,13 @@ export function Events() {
         style={{
           fontFamily: "var(--font-stamp)",
           fontSize: "clamp(0.5rem, 0.58vw, 0.5625rem)",
-          fontWeight: 400,
-          color: "var(--color-warmwood)",
+          fontWeight: 500,
+          color: "var(--color-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           margin: "0 0 clamp(1.5rem, 3.5vh, 2.25rem) 0",
           paddingLeft: IMG_PAD,
-          opacity: 0.65,
+          opacity: 0.85,
         }}
       >
         Happening here
@@ -51,7 +53,7 @@ export function Events() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-6%" }}
         transition={{ duration: 1.0, delay: prefersReduced ? 0 : 0.05, ease: EASE }}
-        style={{ paddingLeft: IMG_PAD, paddingRight: IMG_PAD, marginBottom: "clamp(3rem, 7vh, 5rem)" }}
+        style={{ position: "relative", paddingLeft: IMG_PAD, paddingRight: IMG_PAD, marginBottom: "clamp(3rem, 7vh, 5rem)" }}
       >
         <div
           style={{
@@ -77,6 +79,60 @@ export function Events() {
             <rect width="100%" height="100%" filter="url(#events-grain)" />
           </svg>
         </div>
+
+        {/* Artifact: event fragment, a flyer pinned over a newer one */}
+        {EXPERIMENTS.artifactVocab && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(-0.75rem, -1.5vh, -1rem)",
+              right: "clamp(1.75rem, 5.5vw, 4rem)",
+              transform: "rotate(2.4deg)",
+              backgroundColor: "#F8F2E4",
+              padding: "0.9rem 1.15rem 1.15rem",
+              boxShadow: "0 8px 32px rgba(40,20,8,0.16), 0 2px 6px rgba(40,20,8,0.06)",
+              clipPath: "polygon(0 0, 100% 0, 100% 86%, 90% 100%, 76% 89%, 62% 100%, 48% 90%, 34% 100%, 20% 89%, 8% 100%, 0 88%)",
+              maxWidth: "13.5rem",
+              zIndex: 3,
+            }}
+          >
+            <p style={{
+              fontFamily: "var(--font-stamp)",
+              fontSize: "0.5rem",
+              fontWeight: 400,
+              color: "var(--color-warmwood)",
+              letterSpacing: "0.13em",
+              textTransform: "uppercase",
+              margin: "0 0 0.4em 0",
+              opacity: 0.7,
+            }}>
+              Pinned this week
+            </p>
+            <p style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "clamp(1.375rem, 2.2vw, 1.75rem)",
+              fontWeight: 400,
+              fontStyle: "italic",
+              color: "var(--color-ink)",
+              lineHeight: 1.05,
+              margin: "0 0 0.25em 0",
+            }}>
+              Film Night
+            </p>
+            <p style={{
+              fontFamily: "var(--font-dm-sans)",
+              fontSize: "0.625rem",
+              fontWeight: 500,
+              color: "var(--color-warmwood)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              margin: 0,
+            }}>
+              Last Friday · 8pm
+            </p>
+          </div>
+        )}
       </motion.div>
 
       <div style={{ paddingLeft: H_PAD, paddingRight: H_PAD }}>
@@ -139,6 +195,10 @@ export function Events() {
           @beku.blr on Instagram
           <span aria-hidden="true" style={{ fontSize: "0.85em", opacity: 0.6 }}>↗</span>
         </motion.a>
+
+        <DwellNote style={{ marginTop: "clamp(1.5rem, 3.5vh, 2.25rem)" }}>
+          No tickets. You just turn up.
+        </DwellNote>
       </div>
     </section>
   )
