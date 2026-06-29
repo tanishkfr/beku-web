@@ -4,11 +4,12 @@ import { motion, useReducedMotion } from "framer-motion"
 import { OpenStatus } from "@/components/OpenStatus"
 import { DwellNote } from "@/components/DwellNote"
 import { EASE, H_PAD } from "@/lib/tokens"
+import { address, contact, hours, rating, links } from "@/lib/business"
 
 // Question: How do I find Beku, and when is it open?
 // Composition: Exhibition label typography. Name, location, hours.
-// Plus the one thing currently missing from the site: the Google rating.
-// 4.7 from 1,892 people is the strongest thing Beku has. Show it.
+// Plus the Google rating — the strongest social proof Beku has.
+// All figures come from lib/business.ts (the single source of truth).
 
 export function Visit() {
   const prefersReduced = useReducedMotion()
@@ -50,7 +51,7 @@ export function Visit() {
         }}
       >
         {/* Stars animate in one by one */}
-        <span aria-label="4.7 stars" style={{ display: "flex", gap: "1px" }}>
+        <span aria-label={`${rating.value} stars`} style={{ display: "flex", gap: "1px" }}>
           {[0,1,2,3,4].map((i) => (
             <motion.span
               key={i}
@@ -77,7 +78,7 @@ export function Visit() {
           color: "var(--color-text-secondary)",
           letterSpacing: "0.02em",
         }}>
-          4.7 on Google
+          {rating.value} on Google
         </span>
         <span aria-hidden="true" style={{
           fontFamily: "var(--font-dm-sans)",
@@ -85,7 +86,7 @@ export function Visit() {
           fontWeight: 300,
           color: "var(--color-text-muted)",
         }}>
-          · 1,892 reviews
+          · {rating.countDisplay} reviews
         </span>
       </motion.div>
 
@@ -163,9 +164,12 @@ export function Visit() {
               lineHeight: 1.65,
               fontStyle: "normal",
             }}>
-              543, 9th Cross Rd<br />
-              3rd Phase, JP Nagar<br />
-              Bangalore 560078
+              {address.lines.map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i < address.lines.length - 1 && <br />}
+                </span>
+              ))}
             </address>
             <p style={{
               fontFamily: "var(--font-dm-sans)",
@@ -179,7 +183,7 @@ export function Visit() {
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "0.75em", flexWrap: "wrap" }}>
               <a
-                href="https://share.google/Axv26Yaqm85EMtgoK"
+                href={links.maps}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -201,7 +205,7 @@ export function Visit() {
                 Open in Maps <span aria-hidden="true">↗</span>
               </a>
               <a
-                href="tel:+919008798842"
+                href={`tel:${contact.phoneE164}`}
                 style={{
                   fontFamily: "var(--font-dm-sans)",
                   fontSize: "clamp(0.75rem, 0.9vw, 0.875rem)",
@@ -215,7 +219,7 @@ export function Visit() {
                 onMouseEnter={(e) => { e.currentTarget.style.opacity = "1" }}
                 onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.75" }}
               >
-                +91 90087 98842
+                {contact.phoneDisplay}
               </a>
             </div>
           </div>
@@ -242,8 +246,8 @@ export function Visit() {
               lineHeight: 1.65,
               margin: 0,
             }}>
-              Open every day<br />
-              11am – 11pm
+              {hours.daysLabel}<br />
+              {hours.rangeLabel}
             </p>
             <p style={{ margin: "0.75em 0 0 0", color: "var(--color-text-muted)" }}>
               <OpenStatus

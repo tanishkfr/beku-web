@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { hours } from "@/lib/business"
 
 export type Phase = "morning" | "midday" | "golden" | "night"
 
@@ -17,8 +18,8 @@ export interface TimeOfDay {
   closesSoon: boolean
 }
 
-const OPEN_MIN = 11 * 60   // 11:00
-const CLOSE_MIN = 23 * 60  // 23:00
+const OPEN_MIN = hours.openMinutes   // 11:00
+const CLOSE_MIN = hours.closeMinutes // 23:00
 
 function phaseFor(hour: number): Phase {
   if (hour >= 5 && hour < 11) return "morning"
@@ -36,13 +37,15 @@ function compute(now: Date): Omit<TimeOfDay, "mounted"> {
   let closesSoon = false
 
   if (!isOpen) {
-    status = mins < OPEN_MIN ? "Closed · opens at 11am" : "Closed · opens tomorrow at 11am"
+    status = mins < OPEN_MIN
+      ? `Closed · opens at ${hours.opensLabel}`
+      : `Closed · opens tomorrow at ${hours.opensLabel}`
   } else if (CLOSE_MIN - mins <= 40) {
     closesSoon = true
     const left = CLOSE_MIN - mins
     status = `Closing soon · ${left} min left`
   } else {
-    status = "Open now · until 11pm"
+    status = `Open now · until ${hours.closesLabel}`
   }
 
   return { phase, isOpen, status, closesSoon }
@@ -58,7 +61,7 @@ export function useTimeOfDay(): TimeOfDay {
     phase: "midday",
     mounted: false,
     isOpen: true,
-    status: "Open every day · 11am – 11pm",
+    status: hours.fullLabel,
     closesSoon: false,
   })
 
