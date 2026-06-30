@@ -315,7 +315,7 @@ export function Visit() {
           }}
         >
           <iframe
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=77.5838%2C12.9079%2C77.5878%2C12.9119&layer=mapnik&marker=${address.geo.latitude}%2C${address.geo.longitude}`}
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=77.5949%2C12.9084%2C77.5989%2C12.9124&layer=mapnik&marker=${address.geo.latitude}%2C${address.geo.longitude}`}
             width="100%"
             height="420"
             style={{ border: 0, display: "block" }}

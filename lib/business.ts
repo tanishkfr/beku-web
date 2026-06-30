@@ -37,7 +37,7 @@ export const address = {
   country: "IN",
   /** Address split into display lines (used by the Visit section). */
   lines: ["543, 9th Cross Rd", "3rd Phase, JP Nagar", "Bangalore 560078"],
-  geo: { latitude: 12.9099, longitude: 77.5858 },
+  geo: { latitude: 12.9104, longitude: 77.5969 },
 } as const
 
 // ── Contact ──────────────────────────────────────────────────────────────────
