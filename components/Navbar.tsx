@@ -78,7 +78,7 @@ export function Navbar() {
               >
                 <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo-icon.svg" alt="Beku" height={34} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+                  <img src="/logo-icon.svg" alt="Beku" style={{ display: "block", height: "30px", width: "auto", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
                 </Link>
               </motion.div>
             ) : (
@@ -91,7 +91,7 @@ export function Navbar() {
               >
                 <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo-full.svg" alt="Beku" height={40} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+                  <img src="/logo-full.svg" alt="Beku" style={{ display: "block", height: "36px", width: "auto", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
                 </Link>
               </motion.div>
             )}
