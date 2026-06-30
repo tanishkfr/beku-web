@@ -169,7 +169,7 @@ export function Arrival() {
               textTransform: "uppercase",
             }}
           >
-            {rating.value} ★ · {rating.countDisplay} reviews
+            {rating.value} ★<span className="hidden sm:inline"> · {rating.countDisplay} reviews</span>
           </span>
         </motion.a>
 
