@@ -66,38 +66,36 @@ export function Navbar() {
         }}
       >
         {/* Logo — house icon by default; full logo (house + wordmark) after hero scroll */}
-        <div style={{ position: "relative", flex: "0 0 auto", height: "40px" }}>
-          {/* House icon — shown while hero wordmark is visible */}
-          <motion.div
-            animate={{ opacity: heroBekuVisible ? 1 : 0 }}
-            transition={{ duration: prefersReduced ? 0 : 0.35, ease: EASE }}
-            style={{
-              position: "absolute", inset: 0,
-              display: "flex", alignItems: "center",
-              pointerEvents: heroBekuVisible ? "auto" : "none",
-            }}
-          >
-            <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-icon.svg" alt="Beku" height={34} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
-            </Link>
-          </motion.div>
-
-          {/* Full logo — animates in once user scrolls past hero wordmark */}
-          <motion.div
-            animate={{ opacity: heroBekuVisible ? 0 : 1 }}
-            transition={{ duration: prefersReduced ? 0 : 0.4, ease: EASE }}
-            style={{
-              position: "absolute", inset: 0,
-              display: "flex", alignItems: "center",
-              pointerEvents: heroBekuVisible ? "none" : "auto",
-            }}
-          >
-            <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-full.svg" alt="Beku" height={40} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
-            </Link>
-          </motion.div>
+        <div style={{ flex: "0 0 auto" }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {heroBekuVisible ? (
+              <motion.div
+                key="icon"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: prefersReduced ? 0 : 0.3, ease: EASE }}
+              >
+                <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo-icon.svg" alt="Beku" height={34} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: prefersReduced ? 0 : 0.4, ease: EASE }}
+              >
+                <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo-full.svg" alt="Beku" height={40} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div style={{ flex: 1 }} />
