@@ -65,42 +65,39 @@ export function Navbar() {
           transition: "background-color 350ms ease, border-color 350ms ease",
         }}
       >
-        {/* Wordmark — FLIP target */}
-        <div style={{ flex: "0 0 auto" }}>
-          <AnimatePresence>
-            {!heroBekuVisible && (
-              <motion.div
-                layoutId="beku-wordmark"
-                initial={{ opacity: prefersReduced ? 1 : 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                transition={prefersReduced ? { duration: 0 } : {
-                  // Tween matched to the hero side so the hand-off is continuous.
-                  layout: { duration: 0.5, ease: EASE },
-                  opacity: { duration: 0.3, ease: EASE },
-                }}
-                style={{ zIndex: 51, transformOrigin: "left top", willChange: "transform" }}
-              >
-                <Link
-                  href="/"
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    fontFamily: "var(--font-cormorant)",
-                    fontSize: "1.3125rem",
-                    fontWeight: 400,
-                    color: CREAM,
-                    letterSpacing: "0.03em",
-                    textDecoration: "none",
-                    transition: "color 350ms ease",
-                    display: "block",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Beku.
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Logo — house icon by default; full logo (house + wordmark) after hero scroll */}
+        <div style={{ position: "relative", flex: "0 0 auto", height: "40px" }}>
+          {/* House icon — shown while hero wordmark is visible */}
+          <motion.div
+            animate={{ opacity: heroBekuVisible ? 1 : 0 }}
+            transition={{ duration: prefersReduced ? 0 : 0.35, ease: EASE }}
+            style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center",
+              pointerEvents: heroBekuVisible ? "auto" : "none",
+            }}
+          >
+            <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-icon.svg" alt="Beku" height={34} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+            </Link>
+          </motion.div>
+
+          {/* Full logo — animates in once user scrolls past hero wordmark */}
+          <motion.div
+            animate={{ opacity: heroBekuVisible ? 0 : 1 }}
+            transition={{ duration: prefersReduced ? 0 : 0.4, ease: EASE }}
+            style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center",
+              pointerEvents: heroBekuVisible ? "none" : "auto",
+            }}
+          >
+            <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Beku home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-full.svg" alt="Beku" height={40} style={{ display: "block", filter: "brightness(0) invert(1)", opacity: 0.9 }} />
+            </Link>
+          </motion.div>
         </div>
 
         <div style={{ flex: 1 }} />

@@ -15,13 +15,10 @@ const INTERIOR_SRC = "https://images.unsplash.com/photo-1554118811-1e0d58224f24?
 function BekuWordmark({ prefersReduced }: { prefersReduced: boolean | null }) {
   return (
     <motion.h1
-      layoutId="beku-wordmark"
       initial={{ opacity: prefersReduced ? 1 : 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={prefersReduced ? { duration: 0 } : {
-        // Tween, not spring — a spring across an ~8x size morph jitters.
-        layout: { duration: 0.5, ease: EASE },
         opacity: { duration: 0.3, ease: EASE },
       }}
       style={{
